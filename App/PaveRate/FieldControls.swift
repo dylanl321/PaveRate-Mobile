@@ -102,11 +102,11 @@ struct ResultHero: View {
                     .accessibilityLabel(statusText)
             }
             Text(value ?? "—")
-                .font(.system(size: palette.heroPoints, weight: .bold, design: .rounded))
+                .outdoorFont(palette.heroPoints)
                 .foregroundStyle(palette.text)
                 .minimumScaleFactor(0.4)
                 .lineLimit(1)
-                .accessibilityLabel(value ?? "No result yet")
+                .accessibilityLabel(value == nil ? "No result yet" : "\(value ?? "") \(unit)")
             Text(unit)
                 .font(.title2.weight(.semibold))
                 .foregroundStyle(palette.muted)
@@ -146,6 +146,8 @@ struct StatusBanner: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(16)
         .background(palette.status(kind), in: RoundedRectangle(cornerRadius: 14))
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(detail.map { "\(message). \($0)" } ?? message)
     }
 }
 

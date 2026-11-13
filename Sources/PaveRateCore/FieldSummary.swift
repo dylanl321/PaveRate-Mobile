@@ -18,9 +18,10 @@ public enum FieldSummaryText {
         job: JobSetup,
         details: [String],
         now: Date,
-        timeZone: TimeZone = .current
+        timeZone: TimeZone = .current,
+        people: String? = nil
     ) -> FieldSummary {
-        var lines = jobHeader(job, now: now, timeZone: timeZone)
+        var lines = jobHeader(job, now: now, timeZone: timeZone, people: people)
         let body = details.map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }.filter { !$0.isEmpty }
         if !body.isEmpty {
             lines.append("")
@@ -38,8 +39,10 @@ public enum FieldSummaryText {
         run: RunMeasure?,
         loads: [LoadTicket],
         extras: [String] = [],
+        photoNotes: [PhotoNote] = [],
         now: Date,
-        timeZone: TimeZone = .current
+        timeZone: TimeZone = .current,
+        people: String? = nil
     ) -> FieldSummary {
         var details: [String] = []
         if let weather, let decision {
@@ -85,14 +88,24 @@ public enum FieldSummaryText {
                 details.append(LoadLedger.line(index: index + 1, load: load, job: job))
             }
         }
+        if !photoNotes.isEmpty {
+            details.append("")
+            details.append("Photos")
+            for (index, note) in photoNotes.enumerated() {
+                details.append(note.line(index: index + 1))
+            }
+        }
         details.append(contentsOf: extras)
         let title = job.siteName.isEmpty ? "PaveRate" : job.siteName
-        return compose(title: title, job: job, details: details, now: now, timeZone: timeZone)
+        return compose(title: title, job: job, details: details, now: now, timeZone: timeZone, people: people)
     }
 
-    private static func jobHeader(_ job: JobSetup, now: Date, timeZone: TimeZone) -> [String] {
+    private static func jobHeader(_ job: JobSetup, now: Date, timeZone: TimeZone, people: String?) -> [String] {
         let when = timestamp(now, timeZone: timeZone)
         var lines = [when, ""]
+        if let people, !people.isEmpty {
+            lines.append(people)
+        }
         lines.append("\(FieldFormat.jsNumber(job.widthFt)) ft wide · \(FieldFormat.jsNumber(job.thicknessIn)) in · \(FieldFormat.groupedRound(job.targetRateLbsSy)) lbs/SY")
         lines.append(job.course.label)
         lines.append("\(job.machine.label)\(job.firstPass ? " · first pass" : "")")

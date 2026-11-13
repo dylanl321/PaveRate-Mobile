@@ -22,10 +22,18 @@
 		B1000000000000000000000D /* RouteLookup.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1000000000000000000000C /* RouteLookup.swift */; };
 		B1000000000000000000000E /* WeatherStrip.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1000000000000000000000D /* WeatherStrip.swift */; };
 		B1000000000000000000000F /* FieldNotes.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1000000000000000000000E /* FieldNotes.swift */; };
+		B10000000000000000000011 /* PhotoCapture.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10000000000000000000011 /* PhotoCapture.swift */; };
+		B10000000000000000000012 /* HistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10000000000000000000012 /* HistoryView.swift */; };
+		B10000000000000000000013 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10000000000000000000013 /* SettingsView.swift */; };
+		B10000000000000000000014 /* ConsoleActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10000000000000000000014 /* ConsoleActivity.swift */; };
+		B20000000000000000000001 /* PaveRateWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = F20000000000000000000001 /* PaveRateWidget.swift */; };
+		B20000000000000000000002 /* PaveRateCore in Frameworks */ = {isa = PBXBuildFile; productRef = E2000000000000000000000B /* PaveRateCore */; };
+		B20000000000000000000003 /* PaveRateWidget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = E20000000000000000000002 /* PaveRateWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		E10000000000000000000003 /* PaveRate.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PaveRate.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		E20000000000000000000002 /* PaveRateWidget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = PaveRateWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		F10000000000000000000001 /* PaveRateApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaveRateApp.swift; sourceTree = "<group>"; };
 		F10000000000000000000002 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		F10000000000000000000003 /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
@@ -41,6 +49,13 @@
 		F1000000000000000000000D /* WeatherStrip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherStrip.swift; sourceTree = "<group>"; };
 		F1000000000000000000000E /* FieldNotes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FieldNotes.swift; sourceTree = "<group>"; };
 		F10000000000000000000010 /* PaveRate.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = PaveRate.entitlements; sourceTree = "<group>"; };
+		F10000000000000000000011 /* PhotoCapture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoCapture.swift; sourceTree = "<group>"; };
+		F10000000000000000000012 /* HistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryView.swift; sourceTree = "<group>"; };
+		F10000000000000000000013 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		F10000000000000000000014 /* ConsoleActivity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConsoleActivity.swift; sourceTree = "<group>"; };
+		F20000000000000000000001 /* PaveRateWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaveRateWidget.swift; sourceTree = "<group>"; };
+		F20000000000000000000002 /* PaveRateWidget.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = PaveRateWidget.entitlements; sourceTree = "<group>"; };
+		F20000000000000000000003 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -54,11 +69,36 @@
 		};
 /* End PBXFrameworksBuildPhase section */
 
+/* Begin PBXContainerItemProxy section */
+		E2000000000000000000000C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E10000000000000000000001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = E20000000000000000000001;
+			remoteInfo = PaveRateWidget;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		E20000000000000000000006 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				B20000000000000000000003 /* PaveRateWidget.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXGroup section */
 		E10000000000000000000004 /* */ = {
 			isa = PBXGroup;
 			children = (
 				E10000000000000000000006 /* PaveRate */,
+				E2000000000000000000000D /* Widget */,
 				E10000000000000000000005 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -67,6 +107,7 @@
 			isa = PBXGroup;
 			children = (
 				E10000000000000000000003 /* PaveRate.app */,
+				E20000000000000000000002 /* PaveRateWidget.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -89,8 +130,22 @@
 				F1000000000000000000000D /* WeatherStrip.swift */,
 				F1000000000000000000000E /* FieldNotes.swift */,
 				F10000000000000000000010 /* PaveRate.entitlements */,
+				F10000000000000000000011 /* PhotoCapture.swift */,
+				F10000000000000000000012 /* HistoryView.swift */,
+				F10000000000000000000013 /* SettingsView.swift */,
+				F10000000000000000000014 /* ConsoleActivity.swift */,
 			);
 			path = App/PaveRate;
+			sourceTree = "<group>";
+		};
+		E2000000000000000000000D /* Widget */ = {
+			isa = PBXGroup;
+			children = (
+				F20000000000000000000001 /* PaveRateWidget.swift */,
+				F20000000000000000000003 /* Info.plist */,
+				F20000000000000000000002 /* PaveRateWidget.entitlements */,
+			);
+			path = Widget;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -103,10 +158,12 @@
 				E10000000000000000000007 /* Sources */,
 				E10000000000000000000008 /* Frameworks */,
 				E10000000000000000000009 /* Resources */,
+				E20000000000000000000006 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				E20000000000000000000007 /* PBXTargetDependency */,
 			);
 			name = PaveRate;
 			packageProductDependencies = (
@@ -115,6 +172,26 @@
 			productName = PaveRate;
 			productReference = E10000000000000000000003 /* PaveRate.app */;
 			productType = "com.apple.product-type.application";
+		};
+		E20000000000000000000001 /* PaveRateWidget */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E2000000000000000000000A /* Build configuration list for PBXNativeTarget "PaveRateWidget" */;
+			buildPhases = (
+				E20000000000000000000003 /* Sources */,
+				E20000000000000000000004 /* Frameworks */,
+				E20000000000000000000005 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = PaveRateWidget;
+			packageProductDependencies = (
+				E2000000000000000000000B /* PaveRateCore */,
+			);
+			productName = PaveRateWidget;
+			productReference = E20000000000000000000002 /* PaveRateWidget.appex */;
+			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
 
@@ -148,6 +225,7 @@
 			projectRoot = "";
 			targets = (
 				E10000000000000000000002 /* PaveRate */,
+				E20000000000000000000001 /* PaveRateWidget */,
 			);
 		};
 /* End PBXProject section */
@@ -181,10 +259,45 @@
 				B1000000000000000000000D /* RouteLookup.swift in Sources */,
 				B1000000000000000000000E /* WeatherStrip.swift in Sources */,
 				B1000000000000000000000F /* FieldNotes.swift in Sources */,
+				B10000000000000000000011 /* PhotoCapture.swift in Sources */,
+				B10000000000000000000012 /* HistoryView.swift in Sources */,
+				B10000000000000000000013 /* SettingsView.swift in Sources */,
+				B10000000000000000000014 /* ConsoleActivity.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E20000000000000000000003 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B20000000000000000000001 /* PaveRateWidget.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E20000000000000000000004 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B20000000000000000000002 /* PaveRateCore in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E20000000000000000000005 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		E20000000000000000000007 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = E20000000000000000000001 /* PaveRateWidget */;
+			targetProxy = E2000000000000000000000C /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		E1000000000000000000000F /* Debug */ = {
@@ -248,7 +361,9 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = PaveRate;
+				INFOPLIST_KEY_NSCameraUsageDescription = "PaveRate uses the camera for ticket photos and for notes pinned to a station.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "PaveRate uses your location to read the paving weather and to measure the run you walk or drive.";
+				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -280,7 +395,9 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = PaveRate;
+				INFOPLIST_KEY_NSCameraUsageDescription = "PaveRate uses the camera for ticket photos and for notes pinned to a station.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "PaveRate uses your location to read the paving weather and to measure the run you walk or drive.";
+				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -296,6 +413,58 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		E20000000000000000000008 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = Widget/PaveRateWidget.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 2;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Widget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = PaveRate;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.1;
+				PRODUCT_BUNDLE_IDENTIFIER = com.paverate.ios.widget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		E20000000000000000000009 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = Widget/PaveRateWidget.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 2;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Widget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = PaveRate;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.1;
+				PRODUCT_BUNDLE_IDENTIFIER = com.paverate.ios.widget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -323,6 +492,15 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+		E2000000000000000000000A /* Build configuration list for PBXNativeTarget "PaveRateWidget" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E20000000000000000000008 /* Debug */,
+				E20000000000000000000009 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
@@ -334,6 +512,11 @@
 
 /* Begin XCSwiftPackageProductDependency section */
 		E1000000000000000000000B /* PaveRateCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E1000000000000000000000A /* XCLocalSwiftPackageReference "." */;
+			productName = PaveRateCore;
+		};
+		E2000000000000000000000B /* PaveRateCore */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = E1000000000000000000000A /* XCLocalSwiftPackageReference "." */;
 			productName = PaveRateCore;

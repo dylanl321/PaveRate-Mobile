@@ -3,6 +3,61 @@ import PaveRateCore
 
 extension AppModel {
     func dailySummary(now: Date = Date()) -> FieldSummary {
+        summary(
+            job: job,
+            weather: cachedWeather,
+            loads: loads,
+            planned: plannedPoints,
+            paved: pavedPoints,
+            photos: photoNotes,
+            ordered: parseField(inputs.feetOrdered),
+            note: dayNote,
+            people: settings.peopleLine,
+            now: now
+        )
+    }
+
+    func summary(for archive: DayArchive) -> FieldSummary {
+        var settings = FieldSettings()
+        settings.foremanName = archive.foremanName
+        settings.crewName = archive.crewName
+        var extras: [String] = []
+        if let ordered = archive.tonsOrdered {
+            extras.append("Tons ordered: \(FieldFormat.fixed(ordered, digits: 2))")
+        }
+        let trimmed = archive.dayNote.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !trimmed.isEmpty {
+            extras.append(trimmed)
+        }
+        let run = GeoMeasure.measure(planned: archive.plannedPoints, paved: archive.pavedPoints, widthFt: archive.job.widthFt)
+        let decision = archive.weather.map {
+            WeatherDecisions.decide(reading: $0, job: archive.job, windNoteMph: self.settings.windNoteMph, strongWindMph: max(self.settings.strongWindMph, self.settings.windNoteMph))
+        }
+        return FieldSummaryText.daily(
+            job: archive.job,
+            weather: archive.weather,
+            decision: decision,
+            run: run.lengthForCalcs > 0 ? run : nil,
+            loads: archive.loads,
+            extras: extras,
+            photoNotes: archive.photoNotes,
+            now: archive.savedAt,
+            people: settings.peopleLine
+        )
+    }
+
+    private func summary(
+        job: JobSetup,
+        weather: WeatherReading?,
+        loads: [LoadTicket],
+        planned: [GeoPoint],
+        paved: [GeoPoint],
+        photos: [PhotoNote],
+        ordered: Double?,
+        note: String,
+        people: String?,
+        now: Date
+    ) -> FieldSummary {
         var extras: [String] = []
         if let feet = feetReport().feet {
             extras.append("Feet left: \(FieldFormat.groupedRound(feet)) ft")
@@ -10,14 +65,32 @@ extension AppModel {
         if let spread = spreadReport().spec {
             extras.append("Spread check: \(spread.label)")
         }
+        if let ordered {
+            extras.append("Tons ordered: \(FieldFormat.fixed(ordered, digits: 2))")
+        }
+        let trimmed = note.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !trimmed.isEmpty {
+            extras.append(trimmed)
+        }
+        let run = GeoMeasure.measure(planned: planned, paved: paved, widthFt: job.widthFt)
+        let decision = weather.map {
+            WeatherDecisions.decide(
+                reading: $0,
+                job: job,
+                windNoteMph: settings.windNoteMph,
+                strongWindMph: max(settings.strongWindMph, settings.windNoteMph)
+            )
+        }
         return FieldSummaryText.daily(
             job: job,
-            weather: cachedWeather,
-            decision: weatherDecision,
-            run: runMeasure.lengthForCalcs > 0 ? runMeasure : nil,
+            weather: weather,
+            decision: decision,
+            run: run.lengthForCalcs > 0 ? run : nil,
             loads: loads,
             extras: extras,
-            now: now
+            photoNotes: photos,
+            now: now,
+            people: people
         )
     }
 

@@ -28,7 +28,13 @@ Each screen shows one large result and an expandable **Show your work** breakdow
 
 **Loads** keep a running tonnage and, when you enter the feet a load covered, a Table 12 yield. Feet Left uses that total while the list has tickets.
 
-**Share** sends the day as text, a high-contrast picture, and a PDF. Copy puts the same text on the pasteboard.
+**Share** sends the day as text, a high-contrast picture, and a PDF. Copy puts the same text on the pasteboard. Photos are pages in the PDF.
+
+**New day** writes the shift to Saved days on the phone before it clears loads, the paved track, photos, and the note. The plan and the mix stay.
+
+**Settings** hold the foreman and crew names, feet or stations as the big length, the wind-note speed, the call-the-plant threshold, default width and mix, Glare as the default, and the Lock Screen switch.
+
+**Lock Screen and widget.** A Live Activity and a Home Screen widget show feet left, tons remaining, and the go or hold call. Both read `group.com.paverate.ios`. Add that App Group to `com.paverate.ios` and to `com.paverate.ios.widget` in the developer account, the same way WeatherKit has to be enabled, or the widget stays on “Open PaveRate”. The phone is expected to sit on the paver console, so the Lock Screen is the one that matters.
 
 Sunlight mode is the default: white background, black type, heavy borders, large fields. Glare mode is the same idea with larger targets for full sun. Night mode uses the web app's dark palette.
 
