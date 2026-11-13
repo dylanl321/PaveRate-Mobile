@@ -15,17 +15,18 @@
 		B10000000000000000000006 /* ToolListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10000000000000000000006 /* ToolListView.swift */; };
 		B10000000000000000000007 /* CalculatorTools.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10000000000000000000007 /* CalculatorTools.swift */; };
 		B10000000000000000000008 /* PaveRateCore in Frameworks */ = {isa = PBXBuildFile; productRef = E1000000000000000000000B /* PaveRateCore */; };
-		B10000000000000000000009 /* TodayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10000000000000000000008 /* TodayView.swift */; };
+B10000000000000000000009 /* TodayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10000000000000000000008 /* TodayView.swift */; };
 		B1000000000000000000000A /* MapRunView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10000000000000000000009 /* MapRunView.swift */; };
 		B1000000000000000000000B /* WeatherService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1000000000000000000000A /* WeatherService.swift */; };
 		B1000000000000000000000C /* ShareExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1000000000000000000000B /* ShareExport.swift */; };
 		B1000000000000000000000D /* RouteLookup.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1000000000000000000000C /* RouteLookup.swift */; };
 		B1000000000000000000000E /* WeatherStrip.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1000000000000000000000D /* WeatherStrip.swift */; };
 		B1000000000000000000000F /* FieldNotes.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1000000000000000000000E /* FieldNotes.swift */; };
-		B10000000000000000000011 /* PhotoCapture.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10000000000000000000011 /* PhotoCapture.swift */; };
+B10000000000000000000011 /* PhotoCapture.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10000000000000000000011 /* PhotoCapture.swift */; };
 		B10000000000000000000012 /* HistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10000000000000000000012 /* HistoryView.swift */; };
 		B10000000000000000000013 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10000000000000000000013 /* SettingsView.swift */; };
 		B10000000000000000000014 /* ConsoleActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10000000000000000000014 /* ConsoleActivity.swift */; };
+		B10000000000000000000020 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F10000000000000000000020 /* Assets.xcassets */; };
 		B20000000000000000000001 /* PaveRateWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = F20000000000000000000001 /* PaveRateWidget.swift */; };
 		B20000000000000000000002 /* PaveRateCore in Frameworks */ = {isa = PBXBuildFile; productRef = E2000000000000000000000B /* PaveRateCore */; };
 		B20000000000000000000003 /* PaveRateWidget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = E20000000000000000000002 /* PaveRateWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -41,7 +42,7 @@
 		F10000000000000000000005 /* JobSetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JobSetupView.swift; sourceTree = "<group>"; };
 		F10000000000000000000006 /* ToolListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToolListView.swift; sourceTree = "<group>"; };
 		F10000000000000000000007 /* CalculatorTools.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalculatorTools.swift; sourceTree = "<group>"; };
-		F10000000000000000000008 /* TodayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayView.swift; sourceTree = "<group>"; };
+F10000000000000000000008 /* TodayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayView.swift; sourceTree = "<group>"; };
 		F10000000000000000000009 /* MapRunView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapRunView.swift; sourceTree = "<group>"; };
 		F1000000000000000000000A /* WeatherService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherService.swift; sourceTree = "<group>"; };
 		F1000000000000000000000B /* ShareExport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareExport.swift; sourceTree = "<group>"; };
@@ -49,10 +50,11 @@
 		F1000000000000000000000D /* WeatherStrip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherStrip.swift; sourceTree = "<group>"; };
 		F1000000000000000000000E /* FieldNotes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FieldNotes.swift; sourceTree = "<group>"; };
 		F10000000000000000000010 /* PaveRate.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = PaveRate.entitlements; sourceTree = "<group>"; };
-		F10000000000000000000011 /* PhotoCapture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoCapture.swift; sourceTree = "<group>"; };
+F10000000000000000000011 /* PhotoCapture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoCapture.swift; sourceTree = "<group>"; };
 		F10000000000000000000012 /* HistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryView.swift; sourceTree = "<group>"; };
 		F10000000000000000000013 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		F10000000000000000000014 /* ConsoleActivity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConsoleActivity.swift; sourceTree = "<group>"; };
+		F10000000000000000000020 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		F20000000000000000000001 /* PaveRateWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaveRateWidget.swift; sourceTree = "<group>"; };
 		F20000000000000000000002 /* PaveRateWidget.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = PaveRateWidget.entitlements; sourceTree = "<group>"; };
 		F20000000000000000000003 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -122,7 +124,7 @@
 				F10000000000000000000005 /* JobSetupView.swift */,
 				F10000000000000000000006 /* ToolListView.swift */,
 				F10000000000000000000007 /* CalculatorTools.swift */,
-				F10000000000000000000008 /* TodayView.swift */,
+F10000000000000000000008 /* TodayView.swift */,
 				F10000000000000000000009 /* MapRunView.swift */,
 				F1000000000000000000000A /* WeatherService.swift */,
 				F1000000000000000000000B /* ShareExport.swift */,
@@ -130,10 +132,11 @@
 				F1000000000000000000000D /* WeatherStrip.swift */,
 				F1000000000000000000000E /* FieldNotes.swift */,
 				F10000000000000000000010 /* PaveRate.entitlements */,
-				F10000000000000000000011 /* PhotoCapture.swift */,
+F10000000000000000000011 /* PhotoCapture.swift */,
 				F10000000000000000000012 /* HistoryView.swift */,
 				F10000000000000000000013 /* SettingsView.swift */,
 				F10000000000000000000014 /* ConsoleActivity.swift */,
+				F10000000000000000000020 /* Assets.xcassets */,
 			);
 			path = App/PaveRate;
 			sourceTree = "<group>";
@@ -235,6 +238,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B10000000000000000000020 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -354,13 +358,15 @@
 		E1000000000000000000000D /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = App/PaveRate/PaveRate.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 3;
 				DEVELOPMENT_TEAM = "";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = PaveRate;
+INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_NSCameraUsageDescription = "PaveRate uses the camera for ticket photos and for notes pinned to a station.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "PaveRate uses your location to read the paving weather and to measure the run you walk or drive.";
 				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
@@ -374,7 +380,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.1;
+				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.paverate.ios;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -388,13 +394,15 @@
 		E1000000000000000000000E /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = App/PaveRate/PaveRate.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 3;
 				DEVELOPMENT_TEAM = "";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = PaveRate;
+INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_NSCameraUsageDescription = "PaveRate uses the camera for ticket photos and for notes pinned to a station.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "PaveRate uses your location to read the paving weather and to measure the run you walk or drive.";
 				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
@@ -408,7 +416,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.1;
+				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.paverate.ios;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -424,7 +432,7 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = Widget/PaveRateWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 3;
 				DEVELOPMENT_TEAM = "";
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Widget/Info.plist;
@@ -435,7 +443,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.1;
+				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.paverate.ios.widget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -450,7 +458,7 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = Widget/PaveRateWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 3;
 				DEVELOPMENT_TEAM = "";
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Widget/Info.plist;
@@ -461,7 +469,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.1;
+				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.paverate.ios.widget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
