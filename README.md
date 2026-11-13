@@ -68,10 +68,17 @@ This repository was built on Linux, which cannot compile or launch an iOS target
 
 ## TestFlight
 
-1. Set a development team and a unique bundle id if `com.paverate.ios` is taken.
-2. Add an app icon asset catalog before you archive. The project does not ship one yet.
-3. Archive with a generic iOS device and upload from the Organizer.
-4. Have a foreman check spread rate, feet left, and tack against a known ticket before relying on it in the field.
+The project ships an app icon (`App/PaveRate/Assets.xcassets`), declares no non-exempt encryption, and is at version 1.0 build 3. Build 1.0 (2) is already on TestFlight. Archive the next one with `scripts/testflight.sh`. Do not pass `BUMP=1` unless 3 has already been uploaded.
+
+1. Create the app record in App Store Connect with bundle id `com.paverate.ios` (or change the id in the project if it is taken).
+2. On a Mac with Xcode signed in to your developer account, run:
+
+   ```bash
+   TEAM_ID=YOURTEAMID scripts/testflight.sh
+   ```
+
+   Add `BUMP=1` to raise the build number before archiving. To use an App Store Connect API key instead of the Xcode login, also set `ASC_KEY_PATH`, `ASC_KEY_ID`, and `ASC_ISSUER_ID`.
+3. Have a foreman check spread rate, feet left, and tack against a known ticket before relying on it in the field.
 
 ## Formula notes
 

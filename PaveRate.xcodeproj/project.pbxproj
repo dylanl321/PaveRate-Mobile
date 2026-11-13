@@ -15,13 +15,14 @@
 		B10000000000000000000006 /* ToolListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10000000000000000000006 /* ToolListView.swift */; };
 		B10000000000000000000007 /* CalculatorTools.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10000000000000000000007 /* CalculatorTools.swift */; };
 		B10000000000000000000008 /* PaveRateCore in Frameworks */ = {isa = PBXBuildFile; productRef = E1000000000000000000000B /* PaveRateCore */; };
-		B10000000000000000000009 /* TodayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10000000000000000000008 /* TodayView.swift */; };
+B10000000000000000000009 /* TodayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10000000000000000000008 /* TodayView.swift */; };
 		B1000000000000000000000A /* MapRunView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10000000000000000000009 /* MapRunView.swift */; };
 		B1000000000000000000000B /* WeatherService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1000000000000000000000A /* WeatherService.swift */; };
 		B1000000000000000000000C /* ShareExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1000000000000000000000B /* ShareExport.swift */; };
 		B1000000000000000000000D /* RouteLookup.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1000000000000000000000C /* RouteLookup.swift */; };
 		B1000000000000000000000E /* WeatherStrip.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1000000000000000000000D /* WeatherStrip.swift */; };
 		B1000000000000000000000F /* FieldNotes.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1000000000000000000000E /* FieldNotes.swift */; };
+		B10000000000000000000020 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F10000000000000000000020 /* Assets.xcassets */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -33,7 +34,7 @@
 		F10000000000000000000005 /* JobSetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JobSetupView.swift; sourceTree = "<group>"; };
 		F10000000000000000000006 /* ToolListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToolListView.swift; sourceTree = "<group>"; };
 		F10000000000000000000007 /* CalculatorTools.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalculatorTools.swift; sourceTree = "<group>"; };
-		F10000000000000000000008 /* TodayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayView.swift; sourceTree = "<group>"; };
+F10000000000000000000008 /* TodayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayView.swift; sourceTree = "<group>"; };
 		F10000000000000000000009 /* MapRunView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapRunView.swift; sourceTree = "<group>"; };
 		F1000000000000000000000A /* WeatherService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherService.swift; sourceTree = "<group>"; };
 		F1000000000000000000000B /* ShareExport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareExport.swift; sourceTree = "<group>"; };
@@ -41,6 +42,7 @@
 		F1000000000000000000000D /* WeatherStrip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeatherStrip.swift; sourceTree = "<group>"; };
 		F1000000000000000000000E /* FieldNotes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FieldNotes.swift; sourceTree = "<group>"; };
 		F10000000000000000000010 /* PaveRate.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = PaveRate.entitlements; sourceTree = "<group>"; };
+		F10000000000000000000020 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -81,7 +83,7 @@
 				F10000000000000000000005 /* JobSetupView.swift */,
 				F10000000000000000000006 /* ToolListView.swift */,
 				F10000000000000000000007 /* CalculatorTools.swift */,
-				F10000000000000000000008 /* TodayView.swift */,
+F10000000000000000000008 /* TodayView.swift */,
 				F10000000000000000000009 /* MapRunView.swift */,
 				F1000000000000000000000A /* WeatherService.swift */,
 				F1000000000000000000000B /* ShareExport.swift */,
@@ -89,6 +91,7 @@
 				F1000000000000000000000D /* WeatherStrip.swift */,
 				F1000000000000000000000E /* FieldNotes.swift */,
 				F10000000000000000000010 /* PaveRate.entitlements */,
+				F10000000000000000000020 /* Assets.xcassets */,
 			);
 			path = App/PaveRate;
 			sourceTree = "<group>";
@@ -157,6 +160,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B10000000000000000000020 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -241,13 +245,15 @@
 		E1000000000000000000000D /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = App/PaveRate/PaveRate.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 3;
 				DEVELOPMENT_TEAM = "";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = PaveRate;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "PaveRate uses your location to read the paving weather and to measure the run you walk or drive.";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -259,7 +265,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.1;
+				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.paverate.ios;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -273,13 +279,15 @@
 		E1000000000000000000000E /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = App/PaveRate/PaveRate.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 3;
 				DEVELOPMENT_TEAM = "";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = PaveRate;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "PaveRate uses your location to read the paving weather and to measure the run you walk or drive.";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -291,7 +299,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.1;
+				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.paverate.ios;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";

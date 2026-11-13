@@ -1,3 +1,4 @@
+import PaveRateCore
 import SwiftUI
 
 enum FieldAppearance: String, Codable, CaseIterable {
