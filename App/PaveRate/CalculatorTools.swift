@@ -41,7 +41,16 @@ struct SpreadRateTool: View {
                 unit: "tons",
                 text: $model.inputs.spreadTons
             )
+            if let tons = model.tonsPlacedToday, tons > 0 {
+                Button("Use tons placed today · \(FieldFormat.fixed(tons, digits: 2))") {
+                    model.checkpoint()
+                    model.inputs.spreadTons = displayNumber(tons)
+                    FieldHaptics.tap()
+                }
+                .buttonStyle(FieldSecondaryButtonStyle())
+            }
             BigNumberField(label: "Distance covered", unit: "ft", text: $model.inputs.spreadDistance)
+            UseRunLengthButton { model.inputs.spreadDistance = $0 }
 
             ResultHero(
                 value: report.headline,
@@ -100,7 +109,7 @@ struct FeetLeftTool: View {
     var body: some View {
         @Bindable var model = model
         let ordered = parseField(model.inputs.feetOrdered)
-        let placed = parseField(model.inputs.feetPlaced)
+        let placed = model.tonsPlacedToday
         let total = parseField(model.inputs.feetTotalLength)
         let report = AsphaltCalculator.feetLeft(
             tonsOrdered: ordered,
@@ -118,8 +127,15 @@ struct FeetLeftTool: View {
             : nil
         VStack(alignment: .leading, spacing: 18) {
             BigNumberField(label: "Tons ordered today", hint: "Plant tickets for the day.", unit: "tons", text: $model.inputs.feetOrdered)
-            BigNumberField(label: "Tons placed so far", unit: "tons", text: $model.inputs.feetPlaced)
+            if model.loads.isEmpty {
+                BigNumberField(label: "Tons placed so far", unit: "tons", text: $model.inputs.feetPlaced)
+            } else {
+                Text("\(FieldFormat.fixed(LoadLedger.tonsPlaced(model.loads), digits: 2)) tons from \(model.loads.count) loads")
+                    .font(.title3.weight(.bold))
+                    .foregroundStyle(palette.text)
+            }
             BigNumberField(label: "Total length", hint: "Optional. Draws a progress bar.", unit: "ft", text: $model.inputs.feetTotalLength)
+            UseRunLengthButton { model.inputs.feetTotalLength = $0 }
             ResultHero(
                 value: report.headline,
                 unit: "ft left today",
@@ -187,6 +203,7 @@ struct TonnageTool: View {
         let report = AsphaltCalculator.tonnage(lengthFt: parseField(model.inputs.tonnageLength), job: model.job)
         VStack(alignment: .leading, spacing: 18) {
             BigNumberField(label: "Length to pave", unit: "ft", text: $model.inputs.tonnageLength)
+            UseRunLengthButton { model.inputs.tonnageLength = $0 }
             ResultHero(
                 value: report.tons.map { FieldFormat.fixed($0, digits: 1) },
                 unit: "tons to order",
@@ -209,6 +226,7 @@ struct TackTool: View {
         let report = AsphaltCalculator.tack(lengthFt: parseField(model.inputs.tackLength), job: model.job)
         VStack(alignment: .leading, spacing: 18) {
             BigNumberField(label: "Length to shoot", unit: "ft", text: $model.inputs.tackLength)
+            UseRunLengthButton { model.inputs.tackLength = $0 }
             SectionLabel(text: "Application")
             ForEach(PaveRateConfig.tackField) { tack in
                 ChoiceButton(
@@ -281,6 +299,7 @@ struct PavingWindowTool: View {
     var body: some View {
         let report = AsphaltCalculator.pavingWindow(job: model.job)
         VStack(alignment: .leading, spacing: 18) {
+            WeatherStrip()
             if model.job.airTempF == nil {
                 Text("Enter the air temperature on the Job tab to check this lift.")
                     .font(.title3)

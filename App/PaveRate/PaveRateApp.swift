@@ -3,11 +3,13 @@ import SwiftUI
 @main
 struct PaveRateApp: App {
     @State private var model = AppModel.load()
+    @State private var location = FieldLocation()
 
     var body: some Scene {
         WindowGroup {
             RootView()
                 .environment(model)
+                .environment(location)
         }
     }
 }
@@ -19,10 +21,24 @@ struct RootView: View {
         let palette = FieldPalette.palette(for: model.appearance)
         TabView {
             NavigationStack {
+                TodayView()
+            }
+            .tabItem {
+                Label("Today", systemImage: "sun.max.fill")
+            }
+
+            NavigationStack {
                 ToolListView()
             }
             .tabItem {
-                Label("Calculators", systemImage: "plus.forwardslash.minus")
+                Label("Calc", systemImage: "plus.forwardslash.minus")
+            }
+
+            NavigationStack {
+                MapRunView()
+            }
+            .tabItem {
+                Label("Map", systemImage: "map")
             }
 
             NavigationStack {

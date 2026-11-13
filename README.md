@@ -1,6 +1,8 @@
 # PaveRate
 
-Offline field calculator for asphalt paving foremen. SwiftUI, iOS 17 and later. No account, no network, no backend.
+Field calculator for asphalt paving foremen. SwiftUI, iOS 17 and later. No account required. The math works with no signal. Weather, the run map, and a GDOT centerline search use the network when it is there, and the last weather reading stays on the phone when it is not.
+
+The product plan for the field day, and what is deliberately not in this build, is [docs/PRODUCT_PLAN.md](docs/PRODUCT_PLAN.md).
 
 The math is a port of the public calculators in [dylanl321/paving-calculator](https://github.com/dylanl321/paving-calculator) (`feat/auth-and-data`). Formulas, units, and GDOT Table 12 tolerances follow that app's `src/lib/config/formulas.ts`, `src/lib/config/index.ts`, and `src/lib/config/paverate.yaml`. The asphalt subset of that config lives in [`Config/paverate-asphalt.yaml`](Config/paverate-asphalt.yaml). Swift constants are locked to the file by `ConfigParityTests`.
 
@@ -18,9 +20,17 @@ Shared job setup (width, compacted thickness, course type, machine, first pass, 
 - **Stick check** — loose height behind the screed is compacted thickness × 1.25.
 - **Paving window** — GDOT Table 4 minimum air temperature for the lift, plus the 60°F OGFC/PEM floor.
 
-Each screen shows one large result and an expandable **Show your work** breakdown. The last job and the last inputs are stored on the device.
+Each screen shows one large result and an expandable **Show your work** breakdown. The last job, the last inputs, the drawn run, the load list, and the last weather reading are stored on the device.
 
-Sunlight mode is the default: white background, black type, heavy borders, large fields. Night mode uses the web app's dark palette.
+**Today** pulls weather for the phone's location and fills air temperature and the 24-hour rain total. Apple WeatherKit is preferred. If it is not entitled or the call fails, Open-Meteo answers with no key (the same forecast host the web app uses). A saved reading is not applied on its own once it is older than 6 hours, or once the phone is more than 15 miles from where it was read.
+
+**Map** draws a plan and a paved track (crosshair points, or GPS while the app is open), shows length, station, and square yards, and can send that length into tonnage, tack, spread rate, and feet left. Route search hits the public GDOT GPAS service and draws a centerline. That length is not applied until you tap the button that prints it.
+
+**Loads** keep a running tonnage and, when you enter the feet a load covered, a Table 12 yield. Feet Left uses that total while the list has tickets.
+
+**Share** sends the day as text, a high-contrast picture, and a PDF. Copy puts the same text on the pasteboard.
+
+Sunlight mode is the default: white background, black type, heavy borders, large fields. Glare mode is the same idea with larger targets for full sun. Night mode uses the web app's dark palette.
 
 ## Project layout
 
@@ -41,7 +51,20 @@ That builds `PaveRateCore` and runs the unit tests. It does not compile the iOS 
 
 Open `PaveRate.xcodeproj` in Xcode 15 or later, pick your team under Signing & Capabilities, and run on an iOS 17+ simulator or device. The bundle id is `com.paverate.ios`.
 
-This repository was built on Linux, which cannot compile or launch an iOS target. The app target has not been built here.
+The target asks for location when you pull weather or track a run (`NSLocationWhenInUseUsageDescription`). It does not ask for always-on location.
+
+### WeatherKit
+
+`App/PaveRate/PaveRate.entitlements` includes the WeatherKit entitlement, and the target points at that file. WeatherKit still has to be turned on for the App ID or the signed build will not install:
+
+1. In the Apple Developer account, open the identifier for `com.paverate.ios` (or whatever bundle id you sign with).
+2. Enable the WeatherKit capability and save.
+3. In Xcode, Signing & Capabilities should show WeatherKit. If the capability was added by hand, regenerate the provisioning profile.
+4. If a simulator refuses to install because the profile does not include WeatherKit, delete the `com.apple.developer.weatherkit` key from the entitlements file until the capability exists. Open-Meteo still fills temperature, wind, rain, the hourly timeline, and the ground forecast.
+
+WeatherKit does not return a ground temperature. When both services answer, the air, wind, and rain come from WeatherKit and the ground forecast comes from Open-Meteo. The ground number is a soil forecast, not an infrared reading of the mat.
+
+This repository was built on Linux, which cannot compile or launch an iOS target. `swift test` covers the package. The app target has not been built here. Map, location permission, WeatherKit, and the share sheet need a simulator or a device.
 
 ## TestFlight
 

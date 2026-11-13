@@ -53,6 +53,7 @@ struct CalculatorScreen: View {
 
     @Environment(AppModel.self) private var model
     @Environment(\.fieldPalette) private var palette
+    @State private var share: SharePayload?
 
     var body: some View {
         ScrollView {
@@ -81,12 +82,27 @@ struct CalculatorScreen: View {
         .background(palette.background.ignoresSafeArea())
         .fieldKeyboardDone()
         .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                if model.canUndo {
+                    Button("Undo") { model.undoLastChange() }
+                        .font(.title3.weight(.bold))
+                }
+            }
+            ToolbarItem(placement: .topBarTrailing) {
+                Button("Share") {
+                    share = SharePayload(items: SummaryExport.items(for: model.summary(for: tool)))
+                }
+                .font(.title3.weight(.bold))
+            }
             if tool != .pavingWindow {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Clear") { model.clear(tool) }
                         .font(.title3.weight(.bold))
                 }
             }
+        }
+        .sheet(item: $share) { payload in
+            ActivityShare(items: payload.items)
         }
     }
 }

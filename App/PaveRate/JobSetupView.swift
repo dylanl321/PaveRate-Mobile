@@ -96,7 +96,7 @@ struct JobSetupView: View {
                 }
                 .tint(palette.good)
                 .padding(16)
-                .frame(minHeight: 72)
+                .frame(minHeight: palette.minControl)
                 .background(palette.surface, in: RoundedRectangle(cornerRadius: 14))
                 .overlay(RoundedRectangle(cornerRadius: 14).stroke(palette.border, lineWidth: palette.borderWidth))
 
@@ -131,9 +131,10 @@ struct JobSetupView: View {
                 }
 
                 SectionLabel(text: "Air and surface")
-                Text("Optional. Enter what you see on site. Nothing here needs a network.")
-                    .font(.body)
-                    .foregroundStyle(palette.muted)
+                WeatherStrip(showsTimeline: false)
+                Text("Type over the GPS numbers if the thermometer in the truck disagrees. A typed number stays until you pull weather again.")
+                    .font(.body.weight(.semibold))
+                    .foregroundStyle(palette.text)
                 BigNumberField(label: "Air temperature", unit: "°F", text: $airText)
                 BigNumberField(
                     label: "Rain in the next 24 hours",
@@ -152,7 +153,7 @@ struct JobSetupView: View {
                 }
                 .tint(palette.bad)
                 .padding(16)
-                .frame(minHeight: 72)
+                .frame(minHeight: palette.minControl)
                 .background(palette.surface, in: RoundedRectangle(cornerRadius: 14))
                 .overlay(RoundedRectangle(cornerRadius: 14).stroke(palette.border, lineWidth: palette.borderWidth))
 
@@ -179,10 +180,28 @@ struct JobSetupView: View {
             if let value = parseField(newValue) { model.job.truckLoadTons = value }
         }
         .onChange(of: airText) { _, newValue in
-            model.job.airTempF = parseField(newValue)
+            let parsed = parseField(newValue)
+            let shown = model.job.airTempF.map(displayNumber) ?? ""
+            if newValue == shown || parsed == model.job.airTempF { return }
+            if parsed == nil, model.job.airTempF == nil { return }
+            model.airTempManual = true
+            model.job.airTempF = parsed
         }
         .onChange(of: rainText) { _, newValue in
-            model.job.rainNext24hIn = parseField(newValue)
+            let parsed = parseField(newValue)
+            let shown = model.job.rainNext24hIn.map(displayNumber) ?? ""
+            if newValue == shown || parsed == model.job.rainNext24hIn { return }
+            if parsed == nil, model.job.rainNext24hIn == nil { return }
+            model.rainManual = true
+            model.job.rainNext24hIn = parsed
+        }
+        .onChange(of: model.job.airTempF) { _, newValue in
+            let shown = newValue.map(displayNumber) ?? ""
+            if airText != shown { airText = shown }
+        }
+        .onChange(of: model.job.rainNext24hIn) { _, newValue in
+            let shown = newValue.map(displayNumber) ?? ""
+            if rainText != shown { rainText = shown }
         }
     }
 
@@ -224,7 +243,7 @@ struct JobSetupView: View {
             Text(title)
                 .font(.title2.weight(.bold))
                 .frame(maxWidth: .infinity)
-                .frame(minHeight: 64)
+                .frame(minHeight: palette.minControl)
                 .foregroundStyle(palette.accentText)
                 .background(palette.accent, in: RoundedRectangle(cornerRadius: 14))
         }
