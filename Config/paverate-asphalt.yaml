@@ -1,0 +1,203 @@
+# Asphalt subset of paverate.yaml from
+# https://github.com/dylanl321/paving-calculator (branch feat/auth-and-data,
+# src/lib/config/paverate.yaml).
+#
+# PaveRateCore reads the same numbers from Sources/PaveRateCore/Config.swift.
+# ConfigParityTests locks the two together. Soil, concrete, and grading
+# sections are omitted from this mobile v1 config.
+#
+# status: VERIFIED | FIELD_ESTIMATE | UNVERIFIED | CONFLICT | NA
+
+app:
+  name: PaveRate
+  tagline: Quick offline asphalt calculator for paving foremen
+
+constants:
+  SF_PER_SY:
+    value: 9
+    unit: sq ft / sq yd
+    status: NA
+  LB_PER_TON:
+    value: 2000
+    unit: lb / ton
+    status: NA
+  TRUCK_LOAD:
+    value: 18.5
+    unit: tons
+    status: FIELD_ESTIMATE
+    note: Fleet rule-of-thumb; user-editable per job
+  SHUTTLE_RETAIN:
+    value: 24
+    unit: tons
+    status: FIELD_ESTIMATE
+  PAVER_RETAIN:
+    value: 14
+    unit: tons
+    status: FIELD_ESTIMATE
+  THICK_MULT:
+    value: 110
+    unit: lbs/SY per in
+    status: FIELD_ESTIMATE
+    note: HMA unit-weight rule-of-thumb
+  STICK_FACTOR:
+    value: 1.25
+    unit: x
+    status: FIELD_ESTIMATE
+    note: Loose-vs-compacted estimate. docs/FORMULAS.md still says 1.2; the running config and tests use 1.25.
+
+defaults:
+  roadWidthFt: 12
+  truckLoadTons: 18.5
+  machine: paver
+  firstPass: false
+  tackApplication: TACK.FIELD_LEVELING
+  wastePct: 0
+  courseType: TOLERANCE.INTERMEDIATE_WEARING
+  # Job store initial thickness is not in the YAML defaults block.
+  # src/lib/stores/job.svelte.ts seeds thicknessIn: 1.5.
+  thicknessIn: 1.5
+
+jobSite:
+  wasteOptions: [0, 5, 10]
+
+machines:
+  - id: paver
+    label: Paver
+    retainTons: 14
+  - id: shuttle
+    label: Shuttle Buggy
+    retainTons: 24
+  - id: mtv
+    label: MTV
+    retainTons: 24
+  - id: none
+    label: None
+    retainTons: 0
+
+weather:
+  rainWarnIn: 0.01
+  rainBlockIn: 0.10
+  tempWarnMarginF: 5
+  ogfcMinAirTempF: 60
+  tackMinAirTempF: 40
+  wetSurfaceBlocked: true
+
+tack:
+  field:
+    - id: TACK.FIELD_LEVELING
+      label: Leveling
+      min: 0.040
+      max: 0.060
+      unit: gal/SY
+      status: FIELD_ESTIMATE
+    - id: TACK.FIELD_TOPPING
+      label: Topping
+      min: 0.040
+      max: 0.060
+      unit: gal/SY
+      status: FIELD_ESTIMATE
+    - id: TACK.FIELD_OGI
+      label: OGI (Open-Graded Interlayer)
+      min: 0.060
+      max: 0.080
+      unit: gal/SY
+      status: FIELD_ESTIMATE
+    - id: TACK.FIELD_ROCKCHIP
+      label: Rock Chip
+      min: 0.085
+      max: 0.085
+      unit: gal/SY
+      status: FIELD_ESTIMATE
+  spec:
+    - id: TACK.NEW_AC
+      label: New AC to New AC / thin-lift leveling
+      min: 0.05
+      max: 0.08
+      unit: gal/yd2
+      status: UNVERIFIED
+    - id: TACK.AGED_LE25RAP
+      label: New AC (<=25% RAP) to aged/milled
+      min: 0.06
+      max: 0.10
+      unit: gal/yd2
+      status: UNVERIFIED
+    - id: TACK.AGED_GT25RAP
+      label: New AC (>25% RAP) to aged/milled
+      min: 0.08
+      max: 0.12
+      unit: gal/yd2
+      status: UNVERIFIED
+
+temperature:
+  - id: TEMP.LE_1IN
+    maxThicknessIn: 1.0
+    minAirTempF: 55
+    status: UNVERIFIED
+  - id: TEMP.1_2IN
+    maxThicknessIn: 2.0
+    minAirTempF: 45
+    status: UNVERIFIED
+  - id: TEMP.2_3IN
+    maxThicknessIn: 3.0
+    minAirTempF: 40
+    status: UNVERIFIED
+  - id: TEMP.3_4IN
+    maxThicknessIn: 4.0
+    minAirTempF: 35
+    status: UNVERIFIED
+  - id: TEMP.4_8IN
+    maxThicknessIn: 8.0
+    minAirTempF: 32
+    status: UNVERIFIED
+    note: 32F and rising; base must not be frozen
+
+spreadTolerance:
+  - id: TOLERANCE.BASE
+    label: Base course
+    toleranceLbsSy: 55
+    note: Asphaltic concrete base course (also any combination of base + surface)
+    status: VERIFIED
+    specRef: SS-400.3.03
+  - id: TOLERANCE.INTERMEDIATE_WEARING
+    label: Intermediate / wearing course
+    toleranceLbsSy: 27.5
+    note: Intermediate and/or wearing course
+    status: VERIFIED
+    specRef: SS-400.3.03
+  - id: TOLERANCE.OGFC
+    label: OGFC (9.5 / 12.5 mm)
+    toleranceLbsSy: 7
+    note: Control spread rate per lot within 7 lbs/yd2 of the designated rate
+    status: VERIFIED
+    specRef: SS-400.3.03
+  - id: TOLERANCE.PEM
+    label: 12.5 mm PEM
+    toleranceLbsSy: 10
+    note: Control spread rate per lot within 10 lbs/yd2 of the designated rate
+    status: VERIFIED
+    specRef: SS-400.3.03
+
+reference_tables:
+  table_12:
+    - id: TOLERANCE.BASE
+      label: Asphaltic concrete base course
+      thickness_tolerance: "±0.5 in. (±13 mm)"
+      spread_tolerance: "±55 lbs/yd² (30 kg/m²)"
+    - id: TOLERANCE.INTERMEDIATE_WEARING
+      label: Intermediate and/or wearing course
+      thickness_tolerance: "±0.25 in. (±6 mm)"
+      spread_tolerance: "±27.5 lbs/yd² (15 kg/m²)"
+    - id: TOLERANCE.BASE_PLUS_SURFACE
+      label: Overall of any combination of 1 and 2
+      thickness_tolerance: "±0.5 in. (±13 mm)"
+      spread_tolerance: "±55 lbs/yd² (30 kg/m²)"
+    - id: TOLERANCE.OGFC
+      label: 9.5 mm OGFC and 12.5 mm OGFC
+      thickness_tolerance: "—"
+      spread_tolerance: "±7 lbs/yd² (4 kg/m²)"
+      note: Control spread rate per lot
+    - id: TOLERANCE.PEM
+      label: 12.5 mm PEM
+      thickness_tolerance: "—"
+      spread_tolerance: "±10 lbs/yd² (6 kg/m²)"
+      note: Control spread rate per lot
