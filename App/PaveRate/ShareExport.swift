@@ -183,6 +183,17 @@ enum FieldHaptics {
             failure()
         }
     }
+
+    static func status(_ status: SpreadSpecStatus) {
+        switch status {
+        case .good:
+            success()
+        case .warn:
+            warning()
+        case .bad:
+            failure()
+        }
+    }
 }
 
 struct FieldPrimaryButtonStyle: ButtonStyle {

@@ -103,7 +103,7 @@ struct SettingsView: View {
                 }
                 .tint(palette.good)
 
-                Text("The widget and the Lock Screen read an App Group named \(FieldBoardStore.appGroupID). Add that group to com.paverate.ios and to com.paverate.ios.widget, or the widget stays on “Open PaveRate”.")
+                Text("The Lock Screen updates from the app itself. The Home Screen widget stays on “Open PaveRate” until the App Group \(FieldBoardStore.appGroupID) is on both app ids. The steps are in the README. The archive does not require that group.")
                     .font(.body.weight(.semibold))
                     .foregroundStyle(palette.text)
             }

@@ -34,7 +34,24 @@ Each screen shows one large result and an expandable **Show your work** breakdow
 
 **Settings** hold the foreman and crew names, feet or stations as the big length, the wind-note speed, the call-the-plant threshold, default width and mix, Glare as the default, and the Lock Screen switch.
 
-**Lock Screen and widget.** A Live Activity and a Home Screen widget show feet left, tons remaining, and the go or hold call. Both read `group.com.paverate.ios`. Add that App Group to `com.paverate.ios` and to `com.paverate.ios.widget` in the developer account, the same way WeatherKit has to be enabled, or the widget stays on “Open PaveRate”. The phone is expected to sit on the paver console, so the Lock Screen is the one that matters.
+**Lock Screen and widget.** The Live Activity is started by the app through ActivityKit. It does not need an App Group, so feet left, tons left, and the go or hold call still show on the Lock Screen while the phone sits on the paver. The Home Screen widget reads `group.com.paverate.ios` when that group is on the provisioning profile. Until then it shows “Open PaveRate”. The entitlements files do not request the group, so an archive signs without it.
+
+To share the live numbers with the widget later:
+
+1. In the Apple Developer account, register an App Group named `group.com.paverate.ios`.
+2. Turn that group on for `com.paverate.ios` and for `com.paverate.ios.widget`.
+3. Add this block back to `App/PaveRate/PaveRate.entitlements` and to `Widget/PaveRateWidget.entitlements`:
+
+   ```xml
+   <key>com.apple.security.application-groups</key>
+   <array>
+     <string>group.com.paverate.ios</string>
+   </array>
+   ```
+
+4. Regenerate the provisioning profiles (Xcode Signing & Capabilities, or download them again) and archive with `scripts/testflight.sh`.
+
+The app already writes the board into that suite when the defaults object exists. The widget already reads it.
 
 Sunlight mode is the default: white background, black type, heavy borders, large fields. Glare mode is the same idea with larger targets for full sun. Night mode uses the web app's dark palette.
 
