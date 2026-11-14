@@ -72,6 +72,8 @@ struct CalculatorScreen: View {
                     TackTool()
                 case .stickCheck:
                     StickCheckTool()
+                case .milling:
+                    MillingTool()
                 case .pavingWindow:
                     PavingWindowTool()
                 }

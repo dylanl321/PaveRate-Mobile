@@ -30,11 +30,21 @@ B10000000000000000000011 /* PhotoCapture.swift in Sources */ = {isa = PBXBuildFi
 		B20000000000000000000001 /* PaveRateWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = F20000000000000000000001 /* PaveRateWidget.swift */; };
 		B20000000000000000000002 /* PaveRateCore in Frameworks */ = {isa = PBXBuildFile; productRef = E2000000000000000000000B /* PaveRateCore */; };
 		B20000000000000000000003 /* PaveRateWidget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = E20000000000000000000002 /* PaveRateWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		B30000000000000000000001 /* PaveRateWatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F30000000000000000000001 /* PaveRateWatchApp.swift */; };
+		B30000000000000000000002 /* PaveRateCore in Frameworks */ = {isa = PBXBuildFile; productRef = E3000000000000000000000B /* PaveRateCore */; };
+		B30000000000000000000003 /* PaveRateWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = E30000000000000000000002 /* PaveRateWatch.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		B30000000000000000000004 /* RoadRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = F30000000000000000000004 /* RoadRouter.swift */; };
+		B30000000000000000000005 /* WatchBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = F30000000000000000000005 /* WatchBridge.swift */; };
+		B30100000000000000000001 /* ComplicationWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = F30100000000000000000001 /* ComplicationWidget.swift */; };
+		B30100000000000000000002 /* PaveRateCore in Frameworks */ = {isa = PBXBuildFile; productRef = E3010000000000000000000B /* PaveRateCore */; };
+		B30100000000000000000003 /* PaveRateComplication.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = E30100000000000000000002 /* PaveRateComplication.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		E10000000000000000000003 /* PaveRate.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PaveRate.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E20000000000000000000002 /* PaveRateWidget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = PaveRateWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		E30000000000000000000002 /* PaveRateWatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PaveRateWatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		E30100000000000000000002 /* PaveRateComplication.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = PaveRateComplication.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		F10000000000000000000001 /* PaveRateApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaveRateApp.swift; sourceTree = "<group>"; };
 		F10000000000000000000002 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		F10000000000000000000003 /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
@@ -58,6 +68,11 @@ F10000000000000000000011 /* PhotoCapture.swift */ = {isa = PBXFileReference; las
 		F20000000000000000000001 /* PaveRateWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaveRateWidget.swift; sourceTree = "<group>"; };
 		F20000000000000000000002 /* PaveRateWidget.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = PaveRateWidget.entitlements; sourceTree = "<group>"; };
 		F20000000000000000000003 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		F30000000000000000000001 /* PaveRateWatchApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaveRateWatchApp.swift; sourceTree = "<group>"; };
+		F30000000000000000000004 /* RoadRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoadRouter.swift; sourceTree = "<group>"; };
+		F30000000000000000000005 /* WatchBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchBridge.swift; sourceTree = "<group>"; };
+		F30100000000000000000001 /* ComplicationWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComplicationWidget.swift; sourceTree = "<group>"; };
+		F30100000000000000000003 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -79,6 +94,20 @@ F10000000000000000000011 /* PhotoCapture.swift */ = {isa = PBXFileReference; las
 			remoteGlobalIDString = E20000000000000000000001;
 			remoteInfo = PaveRateWidget;
 		};
+		E30000000000000000000012 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E10000000000000000000001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = E30000000000000000000001;
+			remoteInfo = PaveRateWatch;
+		};
+		E3000000000000000000000C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E10000000000000000000001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = E30100000000000000000001;
+			remoteInfo = PaveRateComplication;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -93,6 +122,28 @@ F10000000000000000000011 /* PhotoCapture.swift */ = {isa = PBXFileReference; las
 			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		E30000000000000000000006 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				B30100000000000000000003 /* PaveRateComplication.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E30000000000000000000010 /* Embed Watch Content */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
+			dstSubfolderSpec = 16;
+			files = (
+				B30000000000000000000003 /* PaveRateWatch.app in Embed Watch Content */,
+			);
+			name = "Embed Watch Content";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -101,6 +152,8 @@ F10000000000000000000011 /* PhotoCapture.swift */ = {isa = PBXFileReference; las
 			children = (
 				E10000000000000000000006 /* PaveRate */,
 				E2000000000000000000000D /* Widget */,
+				E3000000000000000000000D /* PaveRateWatch */,
+				E3010000000000000000000D /* Complication */,
 				E10000000000000000000005 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -110,6 +163,8 @@ F10000000000000000000011 /* PhotoCapture.swift */ = {isa = PBXFileReference; las
 			children = (
 				E10000000000000000000003 /* PaveRate.app */,
 				E20000000000000000000002 /* PaveRateWidget.appex */,
+				E30000000000000000000002 /* PaveRateWatch.app */,
+				E30100000000000000000002 /* PaveRateComplication.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -137,6 +192,8 @@ F10000000000000000000011 /* PhotoCapture.swift */,
 				F10000000000000000000013 /* SettingsView.swift */,
 				F10000000000000000000014 /* ConsoleActivity.swift */,
 				F10000000000000000000020 /* Assets.xcassets */,
+				F30000000000000000000004 /* RoadRouter.swift */,
+				F30000000000000000000005 /* WatchBridge.swift */,
 			);
 			path = App/PaveRate;
 			sourceTree = "<group>";
@@ -151,6 +208,23 @@ F10000000000000000000011 /* PhotoCapture.swift */,
 			path = Widget;
 			sourceTree = "<group>";
 		};
+		E3000000000000000000000D /* PaveRateWatch */ = {
+			isa = PBXGroup;
+			children = (
+				F30000000000000000000001 /* PaveRateWatchApp.swift */,
+			);
+			path = Watch/PaveRateWatch;
+			sourceTree = "<group>";
+		};
+		E3010000000000000000000D /* Complication */ = {
+			isa = PBXGroup;
+			children = (
+				F30100000000000000000001 /* ComplicationWidget.swift */,
+				F30100000000000000000003 /* Info.plist */,
+			);
+			path = Watch/Complication;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -162,11 +236,13 @@ F10000000000000000000011 /* PhotoCapture.swift */,
 				E10000000000000000000008 /* Frameworks */,
 				E10000000000000000000009 /* Resources */,
 				E20000000000000000000006 /* Embed Foundation Extensions */,
+				E30000000000000000000010 /* Embed Watch Content */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 				E20000000000000000000007 /* PBXTargetDependency */,
+				E30000000000000000000011 /* PBXTargetDependency */,
 			);
 			name = PaveRate;
 			packageProductDependencies = (
@@ -194,6 +270,48 @@ F10000000000000000000011 /* PhotoCapture.swift */,
 			);
 			productName = PaveRateWidget;
 			productReference = E20000000000000000000002 /* PaveRateWidget.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+		E30000000000000000000001 /* PaveRateWatch */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E3000000000000000000000A /* Build configuration list for PBXNativeTarget "PaveRateWatch" */;
+			buildPhases = (
+				E30000000000000000000003 /* Sources */,
+				E30000000000000000000004 /* Frameworks */,
+				E30000000000000000000005 /* Resources */,
+				E30000000000000000000006 /* Embed Foundation Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				E30000000000000000000007 /* PBXTargetDependency */,
+			);
+			name = PaveRateWatch;
+			packageProductDependencies = (
+				E3000000000000000000000B /* PaveRateCore */,
+			);
+			productName = PaveRateWatch;
+			productReference = E30000000000000000000002 /* PaveRateWatch.app */;
+			productType = "com.apple.product-type.application";
+		};
+		E30100000000000000000001 /* PaveRateComplication */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E3010000000000000000000A /* Build configuration list for PBXNativeTarget "PaveRateComplication" */;
+			buildPhases = (
+				E30100000000000000000003 /* Sources */,
+				E30100000000000000000004 /* Frameworks */,
+				E30100000000000000000005 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = PaveRateComplication;
+			packageProductDependencies = (
+				E3010000000000000000000B /* PaveRateCore */,
+			);
+			productName = PaveRateComplication;
+			productReference = E30100000000000000000002 /* PaveRateComplication.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
@@ -229,6 +347,8 @@ F10000000000000000000011 /* PhotoCapture.swift */,
 			targets = (
 				E10000000000000000000002 /* PaveRate */,
 				E20000000000000000000001 /* PaveRateWidget */,
+				E30000000000000000000001 /* PaveRateWatch */,
+				E30100000000000000000001 /* PaveRateComplication */,
 			);
 		};
 /* End PBXProject section */
@@ -267,6 +387,8 @@ F10000000000000000000011 /* PhotoCapture.swift */,
 				B10000000000000000000012 /* HistoryView.swift in Sources */,
 				B10000000000000000000013 /* SettingsView.swift in Sources */,
 				B10000000000000000000014 /* ConsoleActivity.swift in Sources */,
+				B30000000000000000000004 /* RoadRouter.swift in Sources */,
+				B30000000000000000000005 /* WatchBridge.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -293,6 +415,52 @@ F10000000000000000000011 /* PhotoCapture.swift */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		E30000000000000000000003 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B30000000000000000000001 /* PaveRateWatchApp.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E30000000000000000000004 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B30000000000000000000002 /* PaveRateCore in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E30000000000000000000005 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E30100000000000000000003 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B30100000000000000000001 /* ComplicationWidget.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E30100000000000000000004 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B30100000000000000000002 /* PaveRateCore in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E30100000000000000000005 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -300,6 +468,16 @@ F10000000000000000000011 /* PhotoCapture.swift */,
 			isa = PBXTargetDependency;
 			target = E20000000000000000000001 /* PaveRateWidget */;
 			targetProxy = E2000000000000000000000C /* PBXContainerItemProxy */;
+		};
+		E30000000000000000000011 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = E30000000000000000000001 /* PaveRateWatch */;
+			targetProxy = E30000000000000000000012 /* PBXContainerItemProxy */;
+		};
+		E30000000000000000000007 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = E30100000000000000000001 /* PaveRateComplication */;
+			targetProxy = E3000000000000000000000C /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -361,7 +539,7 @@ F10000000000000000000011 /* PhotoCapture.swift */,
 ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = App/PaveRate/PaveRate.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_TEAM = "";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -397,7 +575,7 @@ INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = App/PaveRate/PaveRate.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_TEAM = "";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -432,7 +610,7 @@ INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = Widget/PaveRateWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_TEAM = "";
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Widget/Info.plist;
@@ -458,7 +636,7 @@ INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = Widget/PaveRateWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_TEAM = "";
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Widget/Info.plist;
@@ -476,6 +654,102 @@ INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		E30000000000000000000008 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 4;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = PaveRate;
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.paverate.ios;
+				INFOPLIST_KEY_WKRunsIndependentlyOfCompanionApp = NO;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.paverate.ios.watchkitapp;
+				PRODUCT_NAME = PaveRateWatch;
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = watchos;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = Debug;
+		};
+		E30000000000000000000009 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 4;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = PaveRate;
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.paverate.ios;
+				INFOPLIST_KEY_WKRunsIndependentlyOfCompanionApp = NO;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.paverate.ios.watchkitapp;
+				PRODUCT_NAME = PaveRateWatch;
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = watchos;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = Release;
+		};
+		E30100000000000000000008 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 4;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Watch/Complication/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = PaveRate;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.paverate.ios.watchkitapp.complication;
+				PRODUCT_NAME = PaveRateComplication;
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = watchos;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = Debug;
+		};
+		E30100000000000000000009 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 4;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Watch/Complication/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = PaveRate;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.paverate.ios.watchkitapp.complication;
+				PRODUCT_NAME = PaveRateComplication;
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = watchos;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
 			};
 			name = Release;
 		};
@@ -509,6 +783,24 @@ INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+		E3000000000000000000000A /* Build configuration list for PBXNativeTarget "PaveRateWatch" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E30000000000000000000008 /* Debug */,
+				E30000000000000000000009 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		E3010000000000000000000A /* Build configuration list for PBXNativeTarget "PaveRateComplication" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E30100000000000000000008 /* Debug */,
+				E30100000000000000000009 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
@@ -525,6 +817,16 @@ INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 			productName = PaveRateCore;
 		};
 		E2000000000000000000000B /* PaveRateCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E1000000000000000000000A /* XCLocalSwiftPackageReference "." */;
+			productName = PaveRateCore;
+		};
+		E3000000000000000000000B /* PaveRateCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E1000000000000000000000A /* XCLocalSwiftPackageReference "." */;
+			productName = PaveRateCore;
+		};
+		E3010000000000000000000B /* PaveRateCore */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = E1000000000000000000000A /* XCLocalSwiftPackageReference "." */;
 			productName = PaveRateCore;

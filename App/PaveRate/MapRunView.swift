@@ -12,6 +12,8 @@ struct MapRunView: View {
     @State private var tracking = false
     @State private var showRoutes = false
     @State private var confirmClear = false
+    @State private var road = RoadSession()
+    @State private var lengthText = ""
 
     var body: some View {
         @Bindable var model = model
@@ -38,6 +40,8 @@ struct MapRunView: View {
                 location.requestAndStart()
             }
         }
+        .onChange(of: road.endFeet) { _, _ in commitRoad() }
+        .onChange(of: road.choice?.id) { _, _ in commitRoad() }
         .sheet(isPresented: $showRoutes) {
             RouteSearchSheet { route in
                 model.savedRoute = SavedRoute(
@@ -92,6 +96,32 @@ struct MapRunView: View {
                     MapPolyline(coordinates: coordinates(model.pavedPoints))
                         .stroke(palette.good, lineWidth: 5)
                 }
+                ForEach(road.mileposts) { marker in
+                    Annotation(marker.label, coordinate: CLLocationCoordinate2D(latitude: marker.point.latitude, longitude: marker.point.longitude)) {
+                        Text(marker.label)
+                            .font(.caption2.weight(.bold))
+                            .foregroundStyle(.white)
+                            .padding(4)
+                            .background(.blue, in: Capsule())
+                    }
+                }
+                ForEach(road.markers) { marker in
+                    Annotation(marker.label, coordinate: CLLocationCoordinate2D(latitude: marker.point.latitude, longitude: marker.point.longitude)) {
+                        Text(marker.label)
+                            .font(.caption.weight(.bold))
+                            .padding(4)
+                            .background(.white, in: Capsule())
+                    }
+                }
+                if road.phase == .along, let end = road.planned.last {
+                    Annotation("End", coordinate: CLLocationCoordinate2D(latitude: end.latitude, longitude: end.longitude)) {
+                        Circle()
+                            .fill(palette.accent)
+                            .frame(width: 26, height: 26)
+                            .overlay(Circle().stroke(.white, lineWidth: 3))
+                            .accessibilityLabel("End of the run")
+                    }
+                }
                 if let head = headPoint {
                     Annotation("Paved", coordinate: CLLocationCoordinate2D(latitude: head.latitude, longitude: head.longitude)) {
                         Circle()
@@ -108,7 +138,12 @@ struct MapRunView: View {
             }
             .onTapGesture { screen in
                 guard let coord = proxy.convert(screen, from: .local) else { return }
-                model.dropPoint(GeoPoint(latitude: coord.latitude, longitude: coord.longitude))
+                let point = GeoPoint(latitude: coord.latitude, longitude: coord.longitude)
+                if road.phase == .manual {
+                    model.dropPoint(point)
+                } else {
+                    Task { await road.handleTap(point) }
+                }
                 FieldHaptics.tap()
             }
             .onMapCameraChange(frequency: .onEnd) { context in
@@ -127,6 +162,7 @@ struct MapRunView: View {
 
     private var sheet: some View {
         @Bindable var model = model
+        @Bindable var road = road
         let run = model.runMeasure
         return VStack(alignment: .leading, spacing: 8) {
             Text(run.lengthForCalcs > 0 ? model.settings.lengthHeadline(feet: run.lengthForCalcs) : "—")
@@ -144,6 +180,7 @@ struct MapRunView: View {
             }
             ScrollView {
                 VStack(spacing: 10) {
+                    roadControls
                     Picker("Line", selection: $model.drawMode) {
                         Text("Plan").tag(RunDrawMode.plan)
                         Text("Paved").tag(RunDrawMode.paved)
@@ -203,6 +240,89 @@ struct MapRunView: View {
         .background(palette.background)
     }
 
+    private var roadControls: some View {
+        @Bindable var road = road
+        return VStack(alignment: .leading, spacing: 10) {
+            Text(road.message)
+                .font(.title3.weight(.bold))
+                .foregroundStyle(palette.text)
+            switch road.phase {
+            case .start:
+                Button("Start here") {
+                    Task { await road.begin(at: GeoPoint(latitude: center.latitude, longitude: center.longitude)) }
+                }
+                .buttonStyle(FieldPrimaryButtonStyle())
+                Button("Start at GPS") {
+                    guard let point = location.coordinate else {
+                        location.requestAndStart()
+                        road.message = "Waiting for GPS."
+                        return
+                    }
+                    Task { await road.begin(at: point) }
+                }
+                .buttonStyle(FieldSecondaryButtonStyle())
+            case .loading:
+                Text("Finding the road…")
+                    .font(.title3.weight(.semibold))
+                    .foregroundStyle(palette.text)
+            case .choose:
+                if let trace = road.trace {
+                    ForEach(trace.directions) { choice in
+                        Button("\(directionArrow(choice.heading)) \(choice.heading) on \(choice.name) · \(FieldFormat.groupedRound(choice.lengthFeet)) ft") {
+                            road.pick(choice)
+                            FieldHaptics.tap()
+                        }
+                        .buttonStyle(FieldPrimaryButtonStyle())
+                    }
+                }
+            case .along:
+                if let choice = road.choice {
+                    Text("\(choice.name) · \(GeoMeasure.stationLabel(feet: road.endFeet)) · \(FieldFormat.groupedRound(GeoMeasure.areaSquareYards(lengthFt: road.endFeet, widthFt: model.job.widthFt))) SY")
+                        .font(.title3.weight(.bold))
+                        .foregroundStyle(palette.text)
+                    Slider(value: $road.endFeet, in: 0...max(choice.lengthFeet, 1))
+                        .accessibilityLabel("End along the road")
+                    BigNumberField(label: "End at", hint: "Feet from the start, along the road.", unit: "ft", text: $lengthText)
+                    Button("Set end at this length") {
+                        if let feet = parseField(lengthText) {
+                            road.endFeet = min(max(0, feet), choice.lengthFeet)
+                            FieldHaptics.tap()
+                        }
+                    }
+                    .buttonStyle(FieldPrimaryButtonStyle())
+                    ForEach(choice.forks) { fork in
+                        Button("Turn \(fork.heading) onto \(fork.name)") {
+                            road.takeFork(fork)
+                            FieldHaptics.tap()
+                        }
+                        .buttonStyle(FieldSecondaryButtonStyle())
+                    }
+                }
+            case .manual:
+                EmptyView()
+            }
+            if road.phase != .manual {
+                Button("Drop points instead") {
+                    road.useManual()
+                }
+                .buttonStyle(FieldSecondaryButtonStyle())
+            } else {
+                Button("Follow the road") {
+                    road.phase = .start
+                    road.message = "Drop a start on the road, or use the phone's GPS."
+                }
+                .buttonStyle(FieldSecondaryButtonStyle())
+            }
+        }
+    }
+
+    private func commitRoad() {
+        let points = road.planned
+        guard points.count >= 2 else { return }
+        model.plannedPoints = points
+        model.drawMode = .plan
+    }
+
     private var headPoint: GeoPoint? {
         let run = model.runMeasure
         guard run.plannedFeet > 0, run.pavedFeet > 0 else { return nil }
@@ -211,7 +331,10 @@ struct MapRunView: View {
 
     private func lengthCaption(_ run: RunMeasure) -> String {
         if run.lengthForCalcs <= 0 {
-            return "Line the crosshair up and drop a point. Or track the run."
+            if road.phase == .manual {
+                return "Line the crosshair up and drop a point. Or track the run."
+            }
+            return "Start on the road, pick a direction, then set the end."
         }
         let station = GeoMeasure.stationLabel(feet: run.lengthForCalcs)
         let area = run.plannedAreaSqYd > 0 ? run.plannedAreaSqYd : run.pavedAreaSqYd
@@ -227,6 +350,20 @@ struct MapRunView: View {
 
     private func routeLength(_ route: SavedRoute) -> Double {
         route.lines.reduce(0) { $0 + GeoMeasure.polylineFeet($1) }
+    }
+
+    private func directionArrow(_ heading: String) -> String {
+        switch heading {
+        case "N": return "↑"
+        case "NE": return "↗"
+        case "E": return "→"
+        case "SE": return "↘"
+        case "S": return "↓"
+        case "SW": return "↙"
+        case "W": return "←"
+        case "NW": return "↖"
+        default: return "→"
+        }
     }
 
     private func coordinates(_ points: [GeoPoint]) -> [CLLocationCoordinate2D] {

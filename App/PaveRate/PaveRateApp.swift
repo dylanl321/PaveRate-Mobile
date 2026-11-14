@@ -10,6 +10,7 @@ struct PaveRateApp: App {
             RootView()
                 .environment(model)
                 .environment(location)
+                .task { WatchBridge.shared.start() }
         }
     }
 }

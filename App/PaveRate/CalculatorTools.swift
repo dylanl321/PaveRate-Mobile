@@ -350,3 +350,37 @@ struct PavingWindowTool: View {
         }
     }
 }
+
+struct MillingTool: View {
+    @Environment(AppModel.self) private var model
+    @Environment(\.fieldPalette) private var palette
+    @AppStorage("paverate.mill.length") private var lengthText = ""
+    @AppStorage("paverate.mill.depth") private var depthText = "2"
+    @AppStorage("paverate.mill.density") private var densityText = "2"
+
+    var body: some View {
+        let result = MillingCalculator.calculate(
+            lengthFt: parseField(lengthText) ?? 0,
+            widthFt: model.job.widthFt,
+            depthIn: parseField(depthText) ?? 0,
+            densityTonsPerCubicYard: parseField(densityText) ?? 0,
+            truckTons: model.job.truckLoadTons
+        )
+        VStack(alignment: .leading, spacing: 18) {
+            Text("Width and truck size come from the job. Density is a field estimate, about 2 tons per cubic yard for asphalt millings.")
+                .font(.body.weight(.semibold))
+                .foregroundStyle(palette.text)
+            BigNumberField(label: "Length to mill", unit: "ft", text: $lengthText)
+            UseRunLengthButton { lengthText = $0 }
+            BigNumberField(label: "Depth", unit: "in", text: $depthText)
+            BigNumberField(label: "Density", hint: "Tons per cubic yard.", unit: "t/CY", text: $densityText)
+            ResultHero(
+                value: result.map { FieldFormat.fixed($0.tons, digits: 1) },
+                unit: "tons removed",
+                secondary: result.map {
+                    "\(FieldFormat.groupedRound($0.squareYards)) SY · \(FieldFormat.fixed($0.truckloads, digits: 1)) loads · one truck covers \(FieldFormat.groupedRound($0.feetPerTruck)) ft"
+                }
+            )
+        }
+    }
+}

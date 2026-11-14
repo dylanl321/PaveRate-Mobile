@@ -14,8 +14,9 @@ struct TodayView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 18) {
+                boardGlance
                 JobStrip(job: model.job)
-                WeatherStrip()
+                WeatherStrip(autoRefresh: true)
                 runGlance
                 if model.plantCall.shouldCall {
                     StatusBanner(kind: .warn, message: model.plantCall.message, detail: "Tons ordered are on Feet Left.")
@@ -82,6 +83,26 @@ struct TodayView: View {
         } message: {
             Text("The shift is written to Saved days first. The plan, the width, and the mix stay.")
         }
+    }
+
+    private var boardGlance: some View {
+        let board = model.currentBoard()
+        return VStack(alignment: .leading, spacing: 4) {
+            Text(board.headline)
+                .font(.title.weight(.bold))
+                .foregroundStyle(palette.text)
+            Text(board.feetLeftText)
+                .outdoorFont(palette.heroPoints)
+                .foregroundStyle(palette.text)
+                .minimumScaleFactor(0.4)
+                .lineLimit(1)
+            Text(board.tonsText)
+                .font(.title2.weight(.bold))
+                .foregroundStyle(palette.text)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(board.headline). \(board.feetLeftText). \(board.tonsText)")
     }
 
     private var runGlance: some View {

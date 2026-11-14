@@ -4,6 +4,8 @@ import PaveRateCore
 
 struct WeatherStrip: View {
     var showsTimeline: Bool = true
+    /// Only the first screen asks for a fresh reading, and only after the cached numbers are on screen.
+    var autoRefresh: Bool = false
 
     @Environment(AppModel.self) private var model
     @Environment(FieldLocation.self) private var location
@@ -79,11 +81,13 @@ struct WeatherStrip: View {
             }
             .tint(palette.good)
         }
-        .onAppear {
+        .task {
+            guard autoRefresh else { return }
+            await Task.yield()
             location.requestAndStart()
         }
         .onChange(of: location.coordinate?.latitude) { _, _ in
-            guard let point = location.coordinate else { return }
+            guard autoRefresh, let point = location.coordinate else { return }
             Task { await model.refreshWeatherIfNeeded(at: point) }
         }
     }

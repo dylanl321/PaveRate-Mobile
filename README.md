@@ -24,7 +24,11 @@ Each screen shows one large result and an expandable **Show your work** breakdow
 
 **Today** pulls weather for the phone's location and fills air temperature and the 24-hour rain total. Apple WeatherKit is preferred. If it is not entitled or the call fails, Open-Meteo answers with no key (the same forecast host the web app uses). A saved reading is not applied on its own once it is older than 6 hours, or once the phone is more than 15 miles from where it was read.
 
-**Map** draws a plan and a paved track (crosshair points, or GPS while the app is open), shows length, station, and square yards, and can send that length into tonnage, tack, spread rate, and feet left. Route search hits the public GDOT GPAS service and draws a centerline. That length is not applied until you tap the button that prints it.
+**Map** follows the road. Drop a start (or use GPS), pick a direction (both ways of the snapped road), then set the end by tapping the highlighted road, typing a length such as 2400 ft, or dragging the slider. The line is the real centerline: GDOT GPAS when that layer answers, otherwise a short MapKit route. Road name, along-road length, area at the job width, and station ticks stay on screen. Milepost labels appear when the GDOT piece includes begin and end measures. At a fork you pick the turn. If neither road service answers, the map says so and you drop points by hand. That length still feeds the calculators. Route search is the same public GDOT layer and is not applied until you tap the button that prints its length.
+
+**Milling** is length × width × depth: square yards, tons removed, and truckloads. Density defaults to 2 tons per cubic yard and stays on the phone with the other inputs.
+
+**Watch** (`com.paverate.ios.watchkitapp`) shows go, hold, feet left, and tons left. The phone sends that board over Watch Connectivity. The watch does not use an App Group.
 
 **Loads** keep a running tonnage and, when you enter the feet a load covered, a Table 12 yield. Feet Left uses that total while the list has tickets.
 
@@ -60,7 +64,8 @@ Sunlight mode is the default: white background, black type, heavy borders, large
 - `Sources/PaveRateCore` — pure calculation module
 - `Tests/PaveRateCoreTests` — ports of the web formula and spec-check tests
 - `App/PaveRate` — SwiftUI app
-- `PaveRate.xcodeproj` — iOS app target linked to the local package
+- `Watch/` — watchOS glance and complication
+- `PaveRate.xcodeproj` — iOS app, widget, and watch targets linked to the local package
 
 ## Verify the math
 
@@ -91,7 +96,9 @@ This repository was built on Linux, which cannot compile or launch an iOS target
 
 ## TestFlight
 
-The project ships an app icon (`App/PaveRate/Assets.xcassets`), declares no non-exempt encryption, and is at version 1.0 build 3. Build 1.0 (2) is already on TestFlight. Archive the next one with `scripts/testflight.sh`. Do not pass `BUMP=1` unless 3 has already been uploaded.
+The project ships an app icon (`App/PaveRate/Assets.xcassets`), declares no non-exempt encryption, and is at version 1.0 build 4. Builds 2 and 3 are already on TestFlight. Archive the next one with `scripts/testflight.sh`. Do not pass `BUMP=1` unless 4 has already been uploaded.
+
+The map follows the road: start, direction, then an end (a tap on the highlighted road, a length, or the slider). If the road service is down, drop points by hand. Milling is with the other calculators. The Watch app (`com.paverate.ios.watchkitapp`) shows go/hold, feet left, and tons left from the phone over Watch Connectivity. It does not use an App Group. The Home Screen widget still reads `group.com.paverate.ios` only when that group is on the profile; until then it says “Open PaveRate”. There is no account and no web sync.
 
 1. Create the app record in App Store Connect with bundle id `com.paverate.ios` (or change the id in the project if it is taken).
 2. On a Mac with Xcode signed in to your developer account, run:
