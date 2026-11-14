@@ -81,7 +81,7 @@ struct BigNumberField: View {
 
     private func styled<V: View>(_ view: V) -> some View {
         view
-            .font(.system(size: fieldSize, weight: .bold, design: .rounded))
+            .font(palette.font(size: fieldSize, weight: .bold, base: fieldSize))
             .foregroundStyle(palette.text)
             .focused($focused)
             .submitLabel(.done)
@@ -231,37 +231,28 @@ struct ResultHero: View {
     var secondary: String?
     var status: StatusKind?
     var statusText: String?
+    /// Pinned at the top of a calculator: the number and unit share a line so the inputs keep room.
+    var compact: Bool = false
 
     @Environment(\.fieldPalette) private var palette
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: compact ? 4 : 8) {
             if let status, let statusText {
-                Text(statusText)
-                    .font(.headline.weight(.bold))
-                    .foregroundStyle(palette.onStatus(status))
-                    .multilineTextAlignment(.leading)
-                    .lineLimit(3)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .padding(.horizontal, 14)
-                    .padding(.vertical, 8)
-                    .background(palette.status(status), in: Capsule())
-                    .accessibilityLabel(statusText)
+                StatusPill(kind: status, text: statusText)
             }
-            Text(value ?? "—")
-                .outdoorFont(palette.heroPoints)
-                .foregroundStyle(palette.text)
-                .minimumScaleFactor(0.35)
-                .lineLimit(2)
-                .fixedSize(horizontal: false, vertical: true)
-                .accessibilityLabel(value == nil ? "No result yet" : "\(value ?? "") \(unit)")
-            Text(unit)
-                .font(.title2.weight(.semibold))
-                .foregroundStyle(palette.muted)
-                .fixedSize(horizontal: false, vertical: true)
+            if compact {
+                HStack(alignment: .firstTextBaseline, spacing: 8) {
+                    valueText(points: palette.heroPoints * 0.72)
+                    unitText
+                }
+            } else {
+                valueText(points: palette.heroPoints)
+                unitText
+            }
             if let secondary {
                 Text(secondary)
-                    .font(.title3)
+                    .font(compact ? .body.weight(.semibold) : .title3)
                     .foregroundStyle(palette.text)
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -273,6 +264,27 @@ struct ResultHero: View {
             RoundedRectangle(cornerRadius: palette.cornerRadius)
                 .stroke(palette.border, lineWidth: palette.borderWidth)
         )
+        .accessibilityElement(children: .combine)
+    }
+
+    private func valueText(points: CGFloat) -> some View {
+        Text(value ?? "—")
+            .outdoorFont(points)
+            .foregroundStyle(palette.text)
+            .minimumScaleFactor(0.35)
+            .lineLimit(compact ? 1 : 2)
+            .fixedSize(horizontal: false, vertical: true)
+            .accessibilityLabel(value == nil ? "No result yet" : "\(value ?? "") \(unit)")
+    }
+
+    private var unitText: some View {
+        Text(unit)
+            .font(.title2.weight(.semibold))
+            .foregroundStyle(palette.muted)
+            .lineLimit(compact ? 2 : nil)
+            .minimumScaleFactor(compact ? 0.6 : 1)
+            .fixedSize(horizontal: false, vertical: true)
+            .accessibilityHidden(true)
     }
 }
 
@@ -593,5 +605,129 @@ struct SectionLabel: View {
         Text(text)
             .font(.title2.weight(.bold))
             .foregroundStyle(palette.text)
+    }
+}
+
+// MARK: - Screen mode, toast, pinned result
+
+/// Sunlight, Glare, and Night from the top bar of every tab. Field or Compact stays in Settings.
+struct ScreenModeMenu: View {
+    @Environment(AppModel.self) private var model
+
+    private var icon: String {
+        switch model.appearance {
+        case .sunlight: return "sun.max"
+        case .glare: return "sun.max.fill"
+        case .night: return "moon.fill"
+        }
+    }
+
+    var body: some View {
+        Menu {
+            ForEach(FieldAppearance.allCases, id: \.self) { mode in
+                Button {
+                    model.appearance = mode
+                    FieldHaptics.tap()
+                } label: {
+                    if mode == model.appearance {
+                        Label(mode.title, systemImage: "checkmark")
+                    } else {
+                        Text(mode.title)
+                    }
+                }
+            }
+        } label: {
+            Image(systemName: icon)
+                .font(.title2.weight(.bold))
+                .frame(minWidth: 44, minHeight: 44)
+        }
+        .accessibilityLabel("Screen: \(model.appearance.title)")
+        .accessibilityHint("Switches between Sunlight, Glare, and Night.")
+    }
+}
+
+extension View {
+    /// Puts the screen mode switch in the top bar.
+    func screenModeToolbar() -> some View {
+        toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                ScreenModeMenu()
+            }
+        }
+    }
+}
+
+/// A word on a status color. Used on the Today hero and on pinned results.
+struct StatusPill: View {
+    let kind: StatusKind
+    let text: String
+
+    @Environment(\.fieldPalette) private var palette
+
+    var body: some View {
+        Text(text)
+            .font(.headline.weight(.bold))
+            .foregroundStyle(palette.onStatus(kind))
+            .multilineTextAlignment(.leading)
+            .lineLimit(3)
+            .fixedSize(horizontal: false, vertical: true)
+            .padding(.horizontal, 14)
+            .padding(.vertical, 8)
+            .background(palette.status(kind), in: Capsule())
+            .accessibilityLabel(text)
+    }
+}
+
+/// Short note after a change, with Undo. Sits above the bottom bar for six seconds.
+struct UndoToast: View {
+    let message: String
+    var canUndo: Bool = true
+    let undo: () -> Void
+
+    @Environment(\.fieldPalette) private var palette
+
+    var body: some View {
+        HStack(spacing: palette.tightSpacing) {
+            Text(message)
+                .font(.title3.weight(.bold))
+                .foregroundStyle(palette.background)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .fixedSize(horizontal: false, vertical: true)
+            if canUndo {
+                Button("Undo", action: undo)
+                    .font(.title3.weight(.bold))
+                    .foregroundStyle(palette.accentText)
+                    .padding(.horizontal, 18)
+                    .frame(minHeight: max(palette.keypadHeight, 48))
+                    .background(palette.accent, in: RoundedRectangle(cornerRadius: palette.cornerRadius - 2))
+                    .buttonStyle(FieldPressStyle())
+                    .accessibilityHint("Puts back the last change.")
+            }
+        }
+        .padding(.leading, palette.cardPadding)
+        .padding(.trailing, 8)
+        .padding(.vertical, 8)
+        .background(palette.text, in: RoundedRectangle(cornerRadius: palette.cornerRadius))
+        .accessibilityElement(children: .contain)
+    }
+}
+
+/// The calculator's answer stays at the top of the screen while the inputs scroll under it.
+struct PinnedResultStack<Header: View, Content: View>: View {
+    @ViewBuilder var header: Header
+    @ViewBuilder var content: Content
+
+    @Environment(\.fieldPalette) private var palette
+
+    var body: some View {
+        LazyVStack(alignment: .leading, spacing: palette.stackSpacing, pinnedViews: [.sectionHeaders]) {
+            Section {
+                content
+            } header: {
+                header
+                    .padding(.bottom, palette.tightSpacing)
+                    .background(palette.background)
+            }
+        }
     }
 }

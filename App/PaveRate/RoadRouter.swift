@@ -224,7 +224,7 @@ enum RoadRouter {
         guard let route = response.routes.first else { return nil }
         let points = coordinates(of: route.polyline)
         guard points.count >= 2 else { return nil }
-        let name = route.name ?? "Road"
+        let name = route.name.isEmpty ? "Road" : route.name
         let length = GeoMeasure.polylineFeet(points)
         guard length >= RoadFollow.minimumDirectionFeet else { return nil }
         let heading = GeoMeasure.compassLabel(degrees: bearing(from: points[0], to: points[min(3, points.count - 1)]))

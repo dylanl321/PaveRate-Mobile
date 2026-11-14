@@ -16,16 +16,6 @@ struct JobSetupView: View {
         @Bindable var model = model
         ScrollView {
             VStack(alignment: .leading, spacing: palette.stackSpacing) {
-                VStack(alignment: .leading, spacing: 8) {
-                    SectionLabel(text: "Screen")
-                    FieldSegmented(
-                        label: "Screen",
-                        options: Array(FieldAppearance.allCases),
-                        title: { $0.title },
-                        selection: $model.appearance
-                    )
-                }
-
                 BigNumberField(
                     label: "Job name",
                     hint: "Optional. Shows on every calculator.",
@@ -143,6 +133,7 @@ struct JobSetupView: View {
         }
         .fieldScroll()
         .navigationTitle("Job")
+        .screenModeToolbar()
         .background(palette.background.ignoresSafeArea())
         .fieldKeyboardDone()
         .onAppear(perform: loadDrafts)

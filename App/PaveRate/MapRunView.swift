@@ -25,6 +25,7 @@ struct MapRunView: View {
             sheet
         }
         .navigationTitle("Map")
+        .screenModeToolbar()
         .navigationBarTitleDisplayMode(.inline)
         .background(palette.background.ignoresSafeArea())
         .fieldKeyboardDone()
@@ -127,7 +128,7 @@ struct MapRunView: View {
                 ForEach(road.mileposts) { marker in
                     Annotation(marker.label, coordinate: CLLocationCoordinate2D(latitude: marker.point.latitude, longitude: marker.point.longitude)) {
                         Text(marker.label)
-                            .font(.system(size: palette.tagPoints, weight: .bold))
+                            .font(palette.font(size: palette.tagPoints, weight: .bold, base: palette.tagPoints))
                             .foregroundStyle(.white)
                             .padding(.horizontal, 6)
                             .padding(.vertical, 3)
@@ -138,7 +139,7 @@ struct MapRunView: View {
                 ForEach(road.markers) { marker in
                     Annotation(marker.label, coordinate: CLLocationCoordinate2D(latitude: marker.point.latitude, longitude: marker.point.longitude)) {
                         Text(marker.label)
-                            .font(.system(size: palette.tagPoints, weight: .bold))
+                            .font(palette.font(size: palette.tagPoints, weight: .bold, base: palette.tagPoints))
                             .foregroundStyle(.black)
                             .padding(.horizontal, 6)
                             .padding(.vertical, 3)

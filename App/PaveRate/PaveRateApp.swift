@@ -89,14 +89,14 @@ struct DensityGate: View {
                     .font(.largeTitle.weight(.bold))
                     .foregroundStyle(palette.text)
                     .fixedSize(horizontal: false, vertical: true)
-                Text("Field is for gloves and sun. Compact fits more on the screen. You can change this in Settings. Sunlight, Glare, and Night stay available either way.")
+                Text("Field is for gloves and sun. Compact fits more on the screen. You can change this in Settings. The sun button at the top of every tab switches Sunlight, Glare, and Night.")
                     .font(.title3.weight(.semibold))
                     .foregroundStyle(palette.text)
                     .fixedSize(horizontal: false, vertical: true)
                 ChoiceButton(
-                    title: "Field",
+                    title: "Field · recommended",
                     subtitle: FieldDensity.field.detail,
-                    selected: true
+                    selected: false
                 ) {
                     choose(.field)
                 }
