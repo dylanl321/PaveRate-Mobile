@@ -61,6 +61,11 @@ private struct EditSnapshot {
     var airTempManual: Bool
     var rainManual: Bool
     var savedRoute: SavedRoute?
+    var archives: [DayArchive]
+    var photoNotes: [PhotoNote]
+    var settings: FieldSettings
+    var dayNote: String
+    var consoleOn: Bool
 }
 
 @MainActor
@@ -78,13 +83,19 @@ final class AppModel {
     var rainManual: Bool = false { didSet { persist() } }
     var savedRoute: SavedRoute? { didSet { persist() } }
     var drawMode: RunDrawMode = .plan { didSet { persist() } }
+    var archives: [DayArchive] = [] { didSet { persist() } }
+    var photoNotes: [PhotoNote] = [] { didSet { persist() } }
+    var settings: FieldSettings = FieldSettings() { didSet { persist() } }
+    var dayNote: String = "" { didSet { persist() } }
+    var consoleOn: Bool = true { didSet { persist() } }
 
     private(set) var undoCount = 0
     var canUndo: Bool { undoCount > 0 }
 
     private var undoStack: [EditSnapshot] = []
     private let defaults: UserDefaults
-    private let storageKey = "paverate.mobile.v2"
+    private let storageKey = "paverate.mobile.v3"
+    private let v2Key = "paverate.mobile.v2"
     private let legacyKey = "paverate.mobile.v1"
     private var isLoading = false
     private var weatherRequestInFlight = false
@@ -99,8 +110,16 @@ final class AppModel {
     static func load(defaults: UserDefaults = .standard) -> AppModel {
         let model = AppModel(job: JobSetup(), appearance: .sunlight, inputs: ToolInputs(), defaults: defaults)
         model.isLoading = true
-        defer { model.isLoading = false }
+        defer {
+            model.isLoading = false
+            FieldBoardPublisher.publish(model.currentBoard(), console: model.consoleOn)
+        }
         if let data = defaults.data(forKey: model.storageKey),
+           let saved = try? JSONDecoder().decode(PersistedV3.self, from: data) {
+            model.apply(saved)
+            return model
+        }
+        if let data = defaults.data(forKey: model.v2Key),
            let saved = try? JSONDecoder().decode(PersistedV2.self, from: data) {
             model.apply(saved)
             return model
@@ -128,7 +147,43 @@ final class AppModel {
 
     var weatherDecision: WeatherDecision? {
         guard let cachedWeather else { return nil }
-        return WeatherDecisions.decide(reading: cachedWeather, job: job)
+        return WeatherDecisions.decide(
+            reading: cachedWeather,
+            job: job,
+            windNoteMph: settings.windNoteMph,
+            strongWindMph: max(settings.strongWindMph, settings.windNoteMph)
+        )
+    }
+
+    var todayHasRecord: Bool {
+        DayHistory.shouldKeep(
+            loads: loads,
+            pavedPoints: pavedPoints,
+            photoNotes: photoNotes,
+            tonsOrdered: parseField(inputs.feetOrdered),
+            weather: cachedWeather,
+            dayNote: dayNote
+        )
+    }
+
+    var plantCall: PlantCall {
+        PlantCallCheck.evaluate(
+            orderedTons: parseField(inputs.feetOrdered),
+            placedTons: tonsPlacedToday ?? 0,
+            thresholdTons: settings.plantCallTons
+        )
+    }
+
+    func currentBoard(now: Date = Date()) -> FieldBoard {
+        FieldBoard.make(
+            jobName: job.siteName,
+            feetLeft: feetReport().feet,
+            tonsOrdered: parseField(inputs.feetOrdered),
+            tonsPlaced: tonsPlacedToday ?? 0,
+            headline: weatherDecision?.headline ?? "Weather not read",
+            status: weatherDecision?.status,
+            now: now
+        )
     }
 
     func checkpoint() {
@@ -150,6 +205,11 @@ final class AppModel {
         airTempManual = previous.airTempManual
         rainManual = previous.rainManual
         savedRoute = previous.savedRoute
+        archives = previous.archives
+        photoNotes = previous.photoNotes
+        settings = previous.settings
+        dayNote = previous.dayNote
+        consoleOn = previous.consoleOn
         isLoading = false
         undoCount = undoStack.count
         persist()
@@ -238,15 +298,22 @@ final class AppModel {
         inputs.feetTotalLength = text
     }
 
-    func addLoad(truck: String, tons: Double, coveredFeet: Double?) {
+    func addLoad(truck: String, tons: Double, coveredFeet: Double?, ticketPhotoFilename: String? = nil) {
         guard tons > 0 else { return }
         checkpoint()
         loads.append(LoadTicket(
             truck: truck.trimmingCharacters(in: .whitespacesAndNewlines),
             tons: tons,
             coveredFeet: coveredFeet,
-            recordedAt: Date()
+            recordedAt: Date(),
+            ticketPhotoFilename: ticketPhotoFilename
         ))
+    }
+
+    func updateLoad(_ ticket: LoadTicket) {
+        guard ticket.tons > 0, let index = loads.firstIndex(where: { $0.id == ticket.id }) else { return }
+        checkpoint()
+        loads[index] = ticket
     }
 
     func deleteLoad(_ id: UUID) {
@@ -255,10 +322,25 @@ final class AppModel {
         loads.removeAll { $0.id == id }
     }
 
-    func startNewDay() {
+    @discardableResult
+    func startNewDay(now: Date = Date()) -> DayArchive? {
+        let record = capturedDay(now: now)
+        let keep = DayHistory.shouldKeep(
+            loads: loads,
+            pavedPoints: pavedPoints,
+            photoNotes: photoNotes,
+            tonsOrdered: parseField(inputs.feetOrdered),
+            weather: cachedWeather,
+            dayNote: dayNote
+        )
         checkpoint()
+        if keep {
+            archives.insert(record, at: 0)
+        }
         loads = []
         pavedPoints = []
+        photoNotes = []
+        dayNote = ""
         inputs.feetPlaced = ""
         inputs.feetOrdered = ""
         inputs.spreadTons = ""
@@ -266,6 +348,78 @@ final class AppModel {
         inputs.plannerSilo = ""
         inputs.plannerTrucks = ""
         inputs.plannerDesired = ""
+        return keep ? record : nil
+    }
+
+    func addPhoto(caption: String, filename: String, stationFeet: Double?, coordinate: GeoPoint?) {
+        checkpoint()
+        photoNotes.append(PhotoNote(
+            caption: caption.trimmingCharacters(in: .whitespacesAndNewlines),
+            stationFeet: stationFeet,
+            latitude: coordinate?.latitude,
+            longitude: coordinate?.longitude,
+            imageFilename: filename
+        ))
+    }
+
+    func deletePhoto(_ id: UUID) {
+        guard photoNotes.contains(where: { $0.id == id }) else { return }
+        checkpoint()
+        photoNotes.removeAll { $0.id == id }
+    }
+
+    func deleteArchive(_ id: UUID) {
+        guard let record = archives.first(where: { $0.id == id }) else { return }
+        checkpoint()
+        archives.removeAll { $0.id == id }
+        let used = referencedImages()
+        for name in record.photoNotes.map(\.imageFilename) + record.loads.compactMap(\.ticketPhotoFilename) where !used.contains(name) {
+            NoteImageStore.delete(name)
+        }
+    }
+
+    func applyJobDefaults() {
+        checkpoint()
+        job.widthFt = settings.defaultWidthFt
+        job.thicknessIn = settings.defaultThicknessIn
+        job.courseTypeId = settings.defaultCourseTypeId
+        job.machineId = settings.defaultMachineId
+        if settings.preferGlare {
+            appearance = .glare
+        }
+    }
+
+    func stationForANote() -> Double? {
+        let run = runMeasure
+        if run.pavedFeet > 0 { return run.pavedFeet }
+        if run.plannedFeet > 0 { return run.plannedFeet }
+        return nil
+    }
+
+    private func capturedDay(now: Date) -> DayArchive {
+        DayArchive(
+            savedAt: now,
+            job: job,
+            loads: loads,
+            plannedPoints: plannedPoints,
+            pavedPoints: pavedPoints,
+            weather: cachedWeather,
+            photoNotes: photoNotes,
+            foremanName: settings.foremanName,
+            crewName: settings.crewName,
+            tonsOrdered: parseField(inputs.feetOrdered),
+            dayNote: dayNote
+        )
+    }
+
+    private func referencedImages() -> Set<String> {
+        var names = Set(photoNotes.map(\.imageFilename))
+        names.formUnion(loads.compactMap(\.ticketPhotoFilename))
+        for record in archives {
+            names.formUnion(record.photoNotes.map(\.imageFilename))
+            names.formUnion(record.loads.compactMap(\.ticketPhotoFilename))
+        }
+        return names
     }
 
     /// Pull a new reading for this spot and fill the job. Clears a manual lock.
@@ -346,6 +500,28 @@ final class AppModel {
         return WeatherPolicy.applying(reading, to: job, policy: policy)
     }
 
+    private func apply(_ saved: PersistedV3) {
+        apply(PersistedV2(
+            job: saved.job,
+            appearance: saved.appearance,
+            inputs: saved.inputs,
+            plannedPoints: saved.plannedPoints,
+            pavedPoints: saved.pavedPoints,
+            loads: saved.loads,
+            weather: saved.weather,
+            followsWeather: saved.followsWeather,
+            airTempManual: saved.airTempManual,
+            rainManual: saved.rainManual,
+            savedRoute: saved.savedRoute,
+            drawMode: saved.drawMode
+        ))
+        archives = saved.archives
+        photoNotes = saved.photoNotes
+        settings = saved.settings
+        dayNote = saved.dayNote
+        consoleOn = saved.consoleOn
+    }
+
     private func apply(_ saved: PersistedV2) {
         job = saved.job
         appearance = saved.appearance
@@ -372,13 +548,18 @@ final class AppModel {
             followsWeather: followsWeather,
             airTempManual: airTempManual,
             rainManual: rainManual,
-            savedRoute: savedRoute
+            savedRoute: savedRoute,
+            archives: archives,
+            photoNotes: photoNotes,
+            settings: settings,
+            dayNote: dayNote,
+            consoleOn: consoleOn
         )
     }
 
     private func persist() {
         guard !isLoading else { return }
-        let snapshot = PersistedV2(
+        let snapshot = PersistedV3(
             job: job,
             appearance: appearance,
             inputs: inputs,
@@ -390,11 +571,37 @@ final class AppModel {
             airTempManual: airTempManual,
             rainManual: rainManual,
             savedRoute: savedRoute,
-            drawMode: drawMode
+            drawMode: drawMode,
+            archives: archives,
+            photoNotes: photoNotes,
+            settings: settings,
+            dayNote: dayNote,
+            consoleOn: consoleOn
         )
         guard let data = try? JSONEncoder().encode(snapshot) else { return }
         defaults.set(data, forKey: storageKey)
+        FieldBoardPublisher.publish(currentBoard(), console: consoleOn)
     }
+}
+
+private struct PersistedV3: Codable {
+    var job: JobSetup
+    var appearance: FieldAppearance
+    var inputs: ToolInputs
+    var plannedPoints: [GeoPoint]
+    var pavedPoints: [GeoPoint]
+    var loads: [LoadTicket]
+    var weather: WeatherReading?
+    var followsWeather: Bool
+    var airTempManual: Bool
+    var rainManual: Bool
+    var savedRoute: SavedRoute?
+    var drawMode: RunDrawMode
+    var archives: [DayArchive]
+    var photoNotes: [PhotoNote]
+    var settings: FieldSettings
+    var dayNote: String
+    var consoleOn: Bool
 }
 
 func parseField(_ text: String) -> Double? {

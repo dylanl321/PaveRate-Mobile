@@ -207,17 +207,22 @@ Sync, when it comes:
 
 Do not block v2 on any of that. A foreman can use this branch with no account.
 
+## Decided
+
+Dylan's defaults, until he says otherwise:
+
+- Wind at 15 mph stays a field note, not a spec. The number is a setting. A stronger note still starts at 25 mph.
+- Snow codes keep marking the surface wet.
+- A reading older than 6 hours, or taken more than 15 miles away, is shown and not applied on its own.
+- The bundle id stays `com.paverate.ios`.
+- The phone sits on the paver console. The Lock Screen (Live Activity) comes before a Watch.
+- New day writes the finished day to a list on the phone before it clears anything.
+
 ## Open questions for Dylan
 
-1. Wind at 15 mph (note) is a field estimate, not a spec. Keep it, change the number, or drop it so the only weather calls are Table 4, tack temperature, and the rain thresholds?
-2. Ground temperature is a forecast soil temperature, labeled as such. Do you want a later pass that records an IR gun reading (typed, or Bluetooth) next to it? The spec cares about the mat and the base, not the model.
-3. Snow codes set the surface wet and say so. The web rain check does not treat snow separately. Keep that, or match the web and ignore snow codes?
-4. A saved reading is not auto-applied past 6 hours, or if the phone is more than 15 miles from where it was read. Are those the right cutoffs for how your crews move?
-5. "New day" throws away the load list after a confirm. Until sync exists, is the share sheet enough of a record, or should the phone keep a stack of past days on the device?
-6. Per-load yield ignores hopper retention. Confirm that. Retention stays on the first-pass spread check only.
-7. GDOT search draws a centerline and does not treat its start as a milepost. Which measure should v3 show: the LRS milepost on the route, the county mile, or the stationing from the plans?
-8. WeatherKit has to be turned on for the App ID or the call fails and Open-Meteo fills in. Is the bundle id staying `com.paverate.ios`, and do you want WeatherKit enabled before TestFlight?
-9. Live Activity next: is the phone usually on the paver console (Lock Screen matters) or in a pocket (the Watch matters more)?
-10. Voice: worth a trial limited to the weather call, or leave the microphone out of a jobsite app?
-11. Any crew that needs meters, or is this imperial for good?
-12. Two foremen on one job, both offline, is the conflict that will define v3. Is append-only loads the rule you want?
+1. Ground temperature is a forecast soil temperature, labeled as such. Do you want a later pass that records an IR gun reading (typed, or Bluetooth) next to it?
+2. Per-load yield ignores hopper retention. Confirm that. Retention stays on the first-pass spread check only.
+3. GDOT search draws a centerline and does not treat its start as a milepost. Which measure should the synced map show: the LRS milepost on the route, the county mile, or the stationing from the plans?
+4. Voice: worth a trial limited to the weather call, or leave the microphone out of a jobsite app?
+5. Any crew that needs meters, or is the length setting (feet or stations) enough? The mix math stays in pounds, tons, and °F.
+6. Two foremen on one job, both offline, is the conflict that will define sync. Is append-only loads the rule you want?

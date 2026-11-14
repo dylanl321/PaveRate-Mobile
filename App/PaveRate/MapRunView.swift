@@ -129,11 +129,12 @@ struct MapRunView: View {
         @Bindable var model = model
         let run = model.runMeasure
         return VStack(alignment: .leading, spacing: 8) {
-            Text(run.lengthForCalcs > 0 ? FieldFormat.groupedRound(run.lengthForCalcs) : "—")
-                .font(.system(size: 48, weight: .bold, design: .rounded))
+            Text(run.lengthForCalcs > 0 ? model.settings.lengthHeadline(feet: run.lengthForCalcs) : "—")
+                .outdoorFont(48)
                 .foregroundStyle(palette.text)
                 .minimumScaleFactor(0.5)
                 .lineLimit(1)
+                .accessibilityLabel(run.lengthForCalcs > 0 ? model.settings.lengthHeadline(feet: run.lengthForCalcs) : "No length yet")
             Text(lengthCaption(run))
                 .font(.title3.weight(.bold))
                 .foregroundStyle(palette.text)

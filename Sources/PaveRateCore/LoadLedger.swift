@@ -7,19 +7,47 @@ public struct LoadTicket: Codable, Equatable, Sendable, Identifiable {
     /// Feet this load covered. Empty when the ticket is in and the length is not.
     public var coveredFeet: Double?
     public var recordedAt: Date
+    /// JPEG stored on the phone. Older saves omit this key.
+    public var ticketPhotoFilename: String?
 
     public init(
         id: UUID = UUID(),
         truck: String,
         tons: Double,
         coveredFeet: Double? = nil,
-        recordedAt: Date = Date()
+        recordedAt: Date = Date(),
+        ticketPhotoFilename: String? = nil
     ) {
         self.id = id
         self.truck = truck
         self.tons = tons
         self.coveredFeet = coveredFeet
         self.recordedAt = recordedAt
+        self.ticketPhotoFilename = ticketPhotoFilename
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case id, truck, tons, coveredFeet, recordedAt, ticketPhotoFilename
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(UUID.self, forKey: .id)
+        truck = try container.decode(String.self, forKey: .truck)
+        tons = try container.decode(Double.self, forKey: .tons)
+        coveredFeet = try container.decodeIfPresent(Double.self, forKey: .coveredFeet)
+        recordedAt = try container.decode(Date.self, forKey: .recordedAt)
+        ticketPhotoFilename = try container.decodeIfPresent(String.self, forKey: .ticketPhotoFilename)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(id, forKey: .id)
+        try container.encode(truck, forKey: .truck)
+        try container.encode(tons, forKey: .tons)
+        try container.encodeIfPresent(coveredFeet, forKey: .coveredFeet)
+        try container.encode(recordedAt, forKey: .recordedAt)
+        try container.encodeIfPresent(ticketPhotoFilename, forKey: .ticketPhotoFilename)
     }
 }
 

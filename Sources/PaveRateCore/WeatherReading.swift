@@ -216,12 +216,17 @@ public struct WeatherDecision: Equatable, Sendable {
 
 public enum WeatherDecisions {
     /// Map a reading onto the GDOT checks the calculators already use.
-    public static func decide(reading: WeatherReading, job: JobSetup) -> WeatherDecision {
+    public static func decide(
+        reading: WeatherReading,
+        job: JobSetup,
+        windNoteMph: Double = WeatherPolicy.windNoteMph,
+        strongWindMph: Double = WeatherPolicy.windStrongMph
+    ) -> WeatherDecision {
         let placement = placementCheck(airTempF: reading.airTempF, thicknessIn: job.thicknessIn)
         let rain = rainCheck(totalRainIn: reading.rainNext24hIn)
         let tack = tackTempCheck(airTempF: reading.airTempF)
         let openGraded = openGradedAirTempCheck(airTempF: reading.airTempF, courseId: job.courseTypeId)
-        let windNote = windNote(mph: reading.windMph)
+        let windNote = windNote(mph: reading.windMph, noteAt: windNoteMph, strongAt: strongWindMph)
         let groundNote = groundNote(tempF: reading.groundTempF)
         let ranked = rank(
             rain: rain,
@@ -262,10 +267,10 @@ public enum WeatherDecisions {
         }
     }
 
-    private static func windNote(mph: Double?) -> String? {
-        guard let mph, mph >= WeatherPolicy.windNoteMph else { return nil }
+    private static func windNote(mph: Double?, noteAt: Double, strongAt: Double) -> String? {
+        guard let mph, mph >= noteAt else { return nil }
         let shown = FieldFormat.jsNumber(FieldFormat.jsRound(mph))
-        if mph >= WeatherPolicy.windStrongMph {
+        if mph >= max(strongAt, noteAt) {
             return "Field note, not a GDOT cutoff: wind \(shown) mph. Most crews hold tack in this. The mat cools faster too."
         }
         return "Field note, not a GDOT cutoff: wind \(shown) mph. Tack drifts and the mat cools faster."

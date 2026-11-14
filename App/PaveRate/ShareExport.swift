@@ -2,8 +2,14 @@ import SwiftUI
 import UIKit
 import PaveRateCore
 
+struct LabeledImage: Identifiable {
+    let id = UUID()
+    var caption: String
+    var image: UIImage
+}
+
 enum SummaryExport {
-    static func items(for summary: FieldSummary) -> [Any] {
+    static func items(for summary: FieldSummary, images: [LabeledImage] = []) -> [Any] {
         var items: [Any] = [summary.plainText]
         let stamp = Int(Date().timeIntervalSince1970)
         if let image = png(for: summary) {
@@ -11,7 +17,7 @@ enum SummaryExport {
             try? image.write(to: url)
             items.append(url)
         }
-        let pdf = pdfData(for: summary)
+        let pdf = pdfData(for: summary, images: images)
         let pdfURL = FileManager.default.temporaryDirectory.appendingPathComponent("paverate-\(stamp).pdf")
         if (try? pdf.write(to: pdfURL)) != nil {
             items.append(pdfURL)
@@ -50,7 +56,7 @@ enum SummaryExport {
         return image.pngData()
     }
 
-    static func pdfData(for summary: FieldSummary) -> Data {
+    static func pdfData(for summary: FieldSummary, images: [LabeledImage] = []) -> Data {
         let page = CGRect(x: 0, y: 0, width: 612, height: 792)
         let renderer = UIGraphicsPDFRenderer(bounds: page)
         let font = UIFont.systemFont(ofSize: 14, weight: .semibold)
@@ -80,7 +86,23 @@ enum SummaryExport {
                 )
                 y += height
             }
+            let captionFont = UIFont.systemFont(ofSize: 16, weight: .bold)
+            for photo in images {
+                context.beginPage()
+                (photo.caption as NSString).draw(
+                    in: CGRect(x: 48, y: 36, width: 516, height: 48),
+                    withAttributes: [.font: captionFont, .foregroundColor: UIColor.black]
+                )
+                let fitted = aspectFit(photo.image.size, into: CGSize(width: 516, height: 640))
+                photo.image.draw(in: CGRect(x: 48, y: 96, width: fitted.width, height: fitted.height))
+            }
         }
+    }
+
+    private static func aspectFit(_ size: CGSize, into box: CGSize) -> CGSize {
+        guard size.width > 0, size.height > 0 else { return box }
+        let scale = min(box.width / size.width, box.height / size.height)
+        return CGSize(width: size.width * scale, height: size.height * scale)
     }
 }
 
@@ -91,6 +113,7 @@ struct SharePayload: Identifiable {
 
 struct ShareBar: View {
     let summary: FieldSummary
+    var images: [LabeledImage] = []
 
     @Environment(\.fieldPalette) private var palette
     @State private var payload: SharePayload?
@@ -100,9 +123,10 @@ struct ShareBar: View {
         VStack(spacing: 12) {
             Button("Share") {
                 FieldHaptics.tap()
-                payload = SharePayload(items: SummaryExport.items(for: summary))
+                payload = SharePayload(items: SummaryExport.items(for: summary, images: images))
             }
             .buttonStyle(FieldPrimaryButtonStyle())
+            .accessibilityHint("Sends text, a picture, and a PDF. Photos are in the PDF.")
 
             Button(copied ? "Copied" : "Copy text") {
                 UIPasteboard.general.string = summary.plainText

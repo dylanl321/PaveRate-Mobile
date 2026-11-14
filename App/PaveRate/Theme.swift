@@ -134,6 +134,50 @@ private struct PaletteKey: EnvironmentKey {
     static let defaultValue = FieldPalette.sunlight
 }
 
+enum OutdoorScale {
+    /// Dynamic Type grows the outdoor size. It does not shrink below it.
+    static func multiplier(_ size: DynamicTypeSize) -> CGFloat {
+        switch size {
+        case .xSmall, .small, .medium, .large:
+            return 1
+        case .xLarge:
+            return 1.12
+        case .xxLarge:
+            return 1.25
+        case .xxxLarge:
+            return 1.4
+        case .accessibility1:
+            return 1.6
+        case .accessibility2:
+            return 1.85
+        case .accessibility3:
+            return 2.1
+        case .accessibility4:
+            return 2.4
+        case .accessibility5:
+            return 2.7
+        @unknown default:
+            return 1
+        }
+    }
+}
+
+struct OutdoorFont: ViewModifier {
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    var base: CGFloat
+    var weight: Font.Weight = .bold
+
+    func body(content: Content) -> some View {
+        content.font(.system(size: base * OutdoorScale.multiplier(dynamicTypeSize), weight: weight, design: .rounded))
+    }
+}
+
+extension View {
+    func outdoorFont(_ base: CGFloat, weight: Font.Weight = .bold) -> some View {
+        modifier(OutdoorFont(base: base, weight: weight))
+    }
+}
+
 extension EnvironmentValues {
     var fieldPalette: FieldPalette {
         get { self[PaletteKey.self] }

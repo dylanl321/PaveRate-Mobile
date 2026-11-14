@@ -20,6 +20,20 @@
                ReferencedContainer = "container:PaveRate.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "E20000000000000000000001"
+               BuildableName = "PaveRateWidget.appex"
+               BlueprintName = "PaveRateWidget"
+               ReferencedContainer = "container:PaveRate.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
       </BuildActionEntries>
    </BuildAction>
    <TestAction
