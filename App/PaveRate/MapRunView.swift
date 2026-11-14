@@ -126,6 +126,7 @@ struct MapRunView: View {
     }
 
     private var sheet: some View {
+        @Bindable var model = model
         let run = model.runMeasure
         return VStack(alignment: .leading, spacing: 8) {
             Text(run.lengthForCalcs > 0 ? FieldFormat.groupedRound(run.lengthForCalcs) : "—")
