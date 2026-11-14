@@ -35,6 +35,7 @@ B10000000000000000000011 /* PhotoCapture.swift in Sources */ = {isa = PBXBuildFi
 		B30000000000000000000003 /* PaveRateWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = E30000000000000000000002 /* PaveRateWatch.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		B30000000000000000000004 /* RoadRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = F30000000000000000000004 /* RoadRouter.swift */; };
 		B30000000000000000000005 /* WatchBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = F30000000000000000000005 /* WatchBridge.swift */; };
+		B30000000000000000000006 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F30000000000000000000007 /* Assets.xcassets */; };
 		B30100000000000000000001 /* ComplicationWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = F30100000000000000000001 /* ComplicationWidget.swift */; };
 		B30100000000000000000002 /* PaveRateCore in Frameworks */ = {isa = PBXBuildFile; productRef = E3010000000000000000000B /* PaveRateCore */; };
 		B30100000000000000000003 /* PaveRateComplication.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = E30100000000000000000002 /* PaveRateComplication.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -72,6 +73,8 @@ F10000000000000000000011 /* PhotoCapture.swift */ = {isa = PBXFileReference; las
 		F30000000000000000000004 /* RoadRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoadRouter.swift; sourceTree = "<group>"; };
 		F30000000000000000000005 /* WatchBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchBridge.swift; sourceTree = "<group>"; };
 		F30000000000000000000006 /* PaveRateWatch.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = PaveRateWatch.entitlements; sourceTree = "<group>"; };
+		F30000000000000000000007 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		F30000000000000000000008 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		F30100000000000000000004 /* PaveRateComplication.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = PaveRateComplication.entitlements; sourceTree = "<group>"; };
 		F30100000000000000000001 /* ComplicationWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComplicationWidget.swift; sourceTree = "<group>"; };
 		F30100000000000000000003 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -214,6 +217,8 @@ F10000000000000000000011 /* PhotoCapture.swift */,
 			isa = PBXGroup;
 			children = (
 				F30000000000000000000001 /* PaveRateWatchApp.swift */,
+				F30000000000000000000007 /* Assets.xcassets */,
+				F30000000000000000000008 /* Info.plist */,
 				F30000000000000000000006 /* PaveRateWatch.entitlements */,
 			);
 			path = Watch/PaveRateWatch;
@@ -452,6 +457,7 @@ F10000000000000000000011 /* PhotoCapture.swift */,
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B30000000000000000000006 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -690,9 +696,14 @@ INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				CURRENT_PROJECT_VERSION = 4;
 				CODE_SIGN_ENTITLEMENTS = Watch/PaveRateWatch/PaveRateWatch.entitlements;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				DEVELOPMENT_TEAM = "";
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Watch/PaveRateWatch/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = PaveRate;
+				INFOPLIST_KEY_CFBundleIconName = AppIcon;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
+				INFOPLIST_KEY_WKApplication = YES;
 				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.paverate.ios;
 				INFOPLIST_KEY_WKRunsIndependentlyOfCompanionApp = NO;
 				MARKETING_VERSION = 1.0;
@@ -715,9 +726,14 @@ INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				CURRENT_PROJECT_VERSION = 4;
 				CODE_SIGN_ENTITLEMENTS = Watch/PaveRateWatch/PaveRateWatch.entitlements;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				DEVELOPMENT_TEAM = "";
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Watch/PaveRateWatch/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = PaveRate;
+				INFOPLIST_KEY_CFBundleIconName = AppIcon;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
+				INFOPLIST_KEY_WKApplication = YES;
 				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.paverate.ios;
 				INFOPLIST_KEY_WKRunsIndependentlyOfCompanionApp = NO;
 				MARKETING_VERSION = 1.0;
@@ -744,6 +760,7 @@ INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Watch/Complication/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = PaveRate;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -773,6 +790,7 @@ INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Watch/Complication/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = PaveRate;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
