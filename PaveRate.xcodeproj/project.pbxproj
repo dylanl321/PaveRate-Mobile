@@ -71,6 +71,8 @@ F10000000000000000000011 /* PhotoCapture.swift */ = {isa = PBXFileReference; las
 		F30000000000000000000001 /* PaveRateWatchApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaveRateWatchApp.swift; sourceTree = "<group>"; };
 		F30000000000000000000004 /* RoadRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoadRouter.swift; sourceTree = "<group>"; };
 		F30000000000000000000005 /* WatchBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchBridge.swift; sourceTree = "<group>"; };
+		F30000000000000000000006 /* PaveRateWatch.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = PaveRateWatch.entitlements; sourceTree = "<group>"; };
+		F30100000000000000000004 /* PaveRateComplication.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = PaveRateComplication.entitlements; sourceTree = "<group>"; };
 		F30100000000000000000001 /* ComplicationWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComplicationWidget.swift; sourceTree = "<group>"; };
 		F30100000000000000000003 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -212,6 +214,7 @@ F10000000000000000000011 /* PhotoCapture.swift */,
 			isa = PBXGroup;
 			children = (
 				F30000000000000000000001 /* PaveRateWatchApp.swift */,
+				F30000000000000000000006 /* PaveRateWatch.entitlements */,
 			);
 			path = Watch/PaveRateWatch;
 			sourceTree = "<group>";
@@ -221,6 +224,7 @@ F10000000000000000000011 /* PhotoCapture.swift */,
 			children = (
 				F30100000000000000000001 /* ComplicationWidget.swift */,
 				F30100000000000000000003 /* Info.plist */,
+				F30100000000000000000004 /* PaveRateComplication.entitlements */,
 			);
 			path = Watch/Complication;
 			sourceTree = "<group>";
@@ -326,6 +330,19 @@ F10000000000000000000011 /* PhotoCapture.swift */,
 				TargetAttributes = {
 					E10000000000000000000002 = {
 						CreatedOnToolsVersion = 16.0;
+						ProvisioningStyle = Automatic;
+					};
+					E20000000000000000000001 = {
+						CreatedOnToolsVersion = 16.0;
+						ProvisioningStyle = Automatic;
+					};
+					E30000000000000000000001 = {
+						CreatedOnToolsVersion = 16.0;
+						ProvisioningStyle = Automatic;
+					};
+					E30100000000000000000001 = {
+						CreatedOnToolsVersion = 16.0;
+						ProvisioningStyle = Automatic;
 					};
 				};
 			};
@@ -539,6 +556,8 @@ F10000000000000000000011 /* PhotoCapture.swift */,
 ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = App/PaveRate/PaveRate.entitlements;
 				CODE_SIGN_STYLE = Automatic;
+				PROVISIONING_PROFILE = "";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_TEAM = "";
 				ENABLE_PREVIEWS = YES;
@@ -575,6 +594,8 @@ INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = App/PaveRate/PaveRate.entitlements;
 				CODE_SIGN_STYLE = Automatic;
+				PROVISIONING_PROFILE = "";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_TEAM = "";
 				ENABLE_PREVIEWS = YES;
@@ -610,6 +631,8 @@ INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = Widget/PaveRateWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
+				PROVISIONING_PROFILE = "";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_TEAM = "";
 				GENERATE_INFOPLIST_FILE = YES;
@@ -636,6 +659,8 @@ INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = Widget/PaveRateWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
+				PROVISIONING_PROFILE = "";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_TEAM = "";
 				GENERATE_INFOPLIST_FILE = YES;
@@ -661,7 +686,10 @@ INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
+				PROVISIONING_PROFILE = "";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				CURRENT_PROJECT_VERSION = 4;
+				CODE_SIGN_ENTITLEMENTS = Watch/PaveRateWatch/PaveRateWatch.entitlements;
 				DEVELOPMENT_TEAM = "";
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = PaveRate;
@@ -683,7 +711,10 @@ INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
+				PROVISIONING_PROFILE = "";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				CURRENT_PROJECT_VERSION = 4;
+				CODE_SIGN_ENTITLEMENTS = Watch/PaveRateWatch/PaveRateWatch.entitlements;
 				DEVELOPMENT_TEAM = "";
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = PaveRate;
@@ -705,7 +736,10 @@ INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
+				PROVISIONING_PROFILE = "";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				CURRENT_PROJECT_VERSION = 4;
+				CODE_SIGN_ENTITLEMENTS = Watch/Complication/PaveRateComplication.entitlements;
 				DEVELOPMENT_TEAM = "";
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Watch/Complication/Info.plist;
@@ -731,7 +765,10 @@ INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
+				PROVISIONING_PROFILE = "";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				CURRENT_PROJECT_VERSION = 4;
+				CODE_SIGN_ENTITLEMENTS = Watch/Complication/PaveRateComplication.entitlements;
 				DEVELOPMENT_TEAM = "";
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Watch/Complication/Info.plist;
