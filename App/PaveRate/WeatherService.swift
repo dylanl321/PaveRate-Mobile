@@ -34,11 +34,20 @@ final class FieldLocation {
         }
     }
 
+    private var wantsUpdates = false
+
     func requestAndStart() {
-        if manager.authorizationStatus == .notDetermined {
+        wantsUpdates = true
+        switch manager.authorizationStatus {
+        case .notDetermined:
             manager.requestWhenInUseAuthorization()
+        case .authorizedAlways, .authorizedWhenInUse:
+            manager.startUpdatingLocation()
+        case .denied, .restricted:
+            break
+        @unknown default:
+            break
         }
-        manager.startUpdatingLocation()
     }
 
     func stop() {
@@ -52,6 +61,9 @@ final class FieldLocation {
 
     fileprivate func apply(status: CLAuthorizationStatus) {
         authorization = status
+        if wantsUpdates, isAuthorized {
+            manager.startUpdatingLocation()
+        }
     }
 }
 
@@ -71,13 +83,18 @@ private final class LocationBridge: NSObject, CLLocationManagerDelegate {
             self.owner?.apply(location: location)
         }
     }
+
+    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+        _ = error
+    }
 }
 
 enum OpenMeteoClient {
     private static let forecastURL = URL(string: "https://api.open-meteo.com/v1/forecast")
 
     static func fetch(latitude: Double, longitude: Double, now: Date = Date()) async throws -> WeatherReading {
-        guard var components = URLComponents(url: forecastURL!, resolvingAgainstBaseURL: false) else {
+        guard let forecastURL,
+              var components = URLComponents(url: forecastURL, resolvingAgainstBaseURL: false) else {
             throw URLError(.badURL)
         }
         components.queryItems = [

@@ -307,7 +307,11 @@ struct MapRunView: View {
                 Button("Start at GPS") {
                     guard let point = location.coordinate else {
                         location.requestAndStart()
-                        road.message = "Waiting for GPS."
+                        if location.authorization == .denied || location.authorization == .restricted {
+                            road.message = "Location is off. Drop a start on the map, or turn location on in Settings."
+                        } else {
+                            road.message = "Waiting for GPS."
+                        }
                         return
                     }
                     Task { await road.begin(at: point) }
@@ -388,6 +392,9 @@ struct MapRunView: View {
     private func applyTypedEnd(maxFeet: Double) {
         guard let feet = parseField(lengthText) else { return }
         endFocused = false
+        if feet > maxFeet + 1 {
+            road.message = "This road trace is \(FieldFormat.groupedRound(maxFeet)) ft. Drop points to go farther."
+        }
         road.endFeet = min(max(0, feet), maxFeet)
         let shown = displayNumber(road.endFeet)
         if lengthText != shown { lengthText = shown }

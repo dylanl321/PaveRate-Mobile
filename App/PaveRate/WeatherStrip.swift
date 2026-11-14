@@ -143,8 +143,13 @@ struct WeatherStrip: View {
 
     private func pull() async {
         location.requestAndStart()
+        guard location.isAuthorized else {
+            failed = false
+            FieldHaptics.warning()
+            return
+        }
         guard let point = location.coordinate else {
-            failed = true
+            failed = false
             FieldHaptics.warning()
             return
         }

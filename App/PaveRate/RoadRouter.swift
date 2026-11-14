@@ -21,6 +21,7 @@ final class RoadSession {
     var endFeet: Double = 0
     var message: String = "Drop a start on the road, or use the phone's GPS."
     private var cachedPieces: [RoadPiece] = []
+    private var searchGeneration = 0
 
     var planned: [GeoPoint] {
         guard let choice else { return [] }
@@ -61,27 +62,39 @@ final class RoadSession {
     }
 
     func begin(at point: GeoPoint) async {
+        searchGeneration += 1
+        let generation = searchGeneration
         phase = .loading
         message = "Finding the road…"
         var pieces = RoadCache.pieces(covering: point)
-        if pieces.isEmpty {
-            pieces = (try? await RoadCenterlines.fetch(around: point)) ?? []
-            if !pieces.isEmpty {
-                RoadCache.save(pieces, around: point)
+        var traced = RoadFollow.trace(pieces: pieces, from: point)
+        if traced == nil {
+            let fresh = (try? await RoadCenterlines.fetch(around: point)) ?? []
+            guard generation == searchGeneration else { return }
+            if !fresh.isEmpty {
+                pieces = fresh
+                RoadCache.save(fresh, around: point)
+                traced = RoadFollow.trace(pieces: pieces, from: point)
             }
         }
+        guard generation == searchGeneration else { return }
         cachedPieces = pieces
-        if let traced = RoadFollow.trace(pieces: pieces, from: point) {
+        if let traced {
             show(traced)
             return
         }
         let routed = await RoadRouter.probe(from: point)
+        guard generation == searchGeneration else { return }
         if !routed.isEmpty {
             show(RoadTrace(roadName: routed[0].name, snapped: point, directions: routed))
             return
         }
         phase = .manual
-        message = "No road service right now. Drop points yourself. Length is the line between the points."
+        if pieces.isEmpty {
+            message = "No road service right now. Drop points yourself. Length is the line between the points."
+        } else {
+            message = "No road under that point. Move the start onto the street, or drop points yourself."
+        }
     }
 
     func pick(_ choice: RoadDirectionChoice) {
@@ -91,6 +104,16 @@ final class RoadSession {
         message = choice.forks.isEmpty
             ? "\(choice.name) · \(choice.heading)"
             : "\(choice.name) ends at a fork. Pick a turn, or set the end on this road."
+        let generation = searchGeneration
+        let pickedID = choice.id
+        Task {
+            let longer = await RoadRouter.extend(choice)
+            guard generation == searchGeneration, phase == .along, self.choice?.id == pickedID else { return }
+            guard longer.lengthFeet > choice.lengthFeet + RoadFollow.minimumDirectionFeet else { return }
+            let wasAtEnd = abs(endFeet - choice.lengthFeet) < 1
+            self.choice = longer
+            if wasAtEnd { endFeet = longer.lengthFeet }
+        }
     }
 
     func takeFork(_ fork: RoadDirectionChoice) {
@@ -143,6 +166,48 @@ enum RoadRouter {
             }
         }
         return dedupe(found)
+    }
+
+    /// Keep routing along the same road until the line is about two miles, or the name changes.
+    static func extend(_ choice: RoadDirectionChoice, towardFeet: Double = 10_560) async -> RoadDirectionChoice {
+        var choice = choice
+        var hops = 0
+        while choice.lengthFeet < towardFeet, hops < 5 {
+            hops += 1
+            guard let next = await hop(from: choice) else { break }
+            let joined = RoadFollow.extend(choice.points, with: next.points)
+            let length = GeoMeasure.polylineFeet(joined)
+            guard length > choice.lengthFeet + RoadFollow.minimumDirectionFeet else { break }
+            choice = RoadDirectionChoice(
+                id: choice.id,
+                name: choice.name,
+                heading: choice.heading,
+                points: joined,
+                lengthFeet: length,
+                forks: choice.forks
+            )
+        }
+        return choice
+    }
+
+    private static func hop(from choice: RoadDirectionChoice) async -> RoadDirectionChoice? {
+        guard choice.points.count >= 2, let last = choice.points.last else { return nil }
+        let previous = choice.points[choice.points.count - 2]
+        let dest = offset(last, bearingDegrees: bearing(from: previous, to: last), degrees: 0.006)
+        guard let routed = await route(from: last, to: dest) else { return nil }
+        let sameName = routed.name.caseInsensitiveCompare(choice.name) == .orderedSame
+            || routed.name == "Road"
+            || choice.name == "Road"
+        guard sameName else { return nil }
+        return routed
+    }
+
+    private static func offset(_ point: GeoPoint, bearingDegrees: Double, degrees: Double) -> GeoPoint {
+        let radians = bearingDegrees * .pi / 180
+        let latitude = point.latitude + degrees * cos(radians)
+        let lonScale = max(0.2, cos(point.latitude * .pi / 180))
+        let longitude = point.longitude + degrees * sin(radians) / lonScale
+        return GeoPoint(latitude: latitude, longitude: longitude)
     }
 
     private static func route(from start: GeoPoint, to end: GeoPoint) async -> RoadDirectionChoice? {
