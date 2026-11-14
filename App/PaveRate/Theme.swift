@@ -1,12 +1,15 @@
+import PaveRateCore
 import SwiftUI
 
 enum FieldAppearance: String, Codable, CaseIterable {
     case sunlight
+    case glare
     case night
 
     var title: String {
         switch self {
         case .sunlight: return "Sunlight"
+        case .glare: return "Glare"
         case .night: return "Night"
         }
     }
@@ -52,6 +55,9 @@ struct FieldPalette {
     let warn: Color
     let bad: Color
     let borderWidth: CGFloat
+    let heroPoints: CGFloat
+    let fieldPoints: CGFloat
+    let minControl: CGFloat
 
     static let sunlight = FieldPalette(
         background: Color(red: 1, green: 1, blue: 1),
@@ -65,7 +71,28 @@ struct FieldPalette {
         good: Color(red: 0, green: 0.478, blue: 0.184),
         warn: Color(red: 0.753, green: 0.345, blue: 0),
         bad: Color(red: 0.8, green: 0, blue: 0),
-        borderWidth: 2
+        borderWidth: 3,
+        heroPoints: 68,
+        fieldPoints: 36,
+        minControl: 76
+    )
+
+    static let glare = FieldPalette(
+        background: .white,
+        surface: .white,
+        surfaceAlt: Color(red: 1, green: 0.96, blue: 0.8),
+        border: .black,
+        text: .black,
+        muted: .black,
+        accent: Color(red: 0.961, green: 0.659, blue: 0),
+        accentText: .black,
+        good: Color(red: 0, green: 0.35, blue: 0.12),
+        warn: Color(red: 0.55, green: 0.22, blue: 0),
+        bad: Color(red: 0.7, green: 0, blue: 0),
+        borderWidth: 4,
+        heroPoints: 76,
+        fieldPoints: 40,
+        minControl: 88
     )
 
     static let night = FieldPalette(
@@ -80,13 +107,17 @@ struct FieldPalette {
         good: Color(red: 0.247, green: 0.698, blue: 0.498),
         warn: Color(red: 0.878, green: 0.573, blue: 0.184),
         bad: Color(red: 0.847, green: 0.345, blue: 0.310),
-        borderWidth: 1
+        borderWidth: 1,
+        heroPoints: 64,
+        fieldPoints: 34,
+        minControl: 72
     )
 
     static func palette(for appearance: FieldAppearance) -> FieldPalette {
         switch appearance {
         case .sunlight: return .sunlight
         case .night: return .night
+        case .glare: return .glare
         }
     }
 

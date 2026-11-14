@@ -20,7 +20,7 @@ struct BigNumberField: View {
                 TextField(numeric ? "0" : "Name", text: $text)
                     .keyboardType(numeric ? .decimalPad : .default)
                     .textInputAutocapitalization(numeric ? .never : .words)
-                    .font(.system(size: 34, weight: .bold, design: .rounded))
+                    .font(.system(size: palette.fieldPoints, weight: .bold, design: .rounded))
                     .foregroundStyle(palette.text)
                     .minimumScaleFactor(0.6)
                     .accessibilityLabel(label)
@@ -31,7 +31,7 @@ struct BigNumberField: View {
                 }
             }
             .padding(.horizontal, 16)
-            .frame(minHeight: 72)
+            .frame(minHeight: palette.minControl)
             .background(palette.surface, in: RoundedRectangle(cornerRadius: 14))
             .overlay(
                 RoundedRectangle(cornerRadius: 14)
@@ -68,7 +68,7 @@ struct ChoiceButton: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, 16)
-            .frame(minHeight: 64)
+            .frame(minHeight: palette.minControl)
             .foregroundStyle(selected ? palette.accentText : palette.text)
             .background(selected ? palette.accent : palette.surface, in: RoundedRectangle(cornerRadius: 14))
             .overlay(
@@ -102,7 +102,7 @@ struct ResultHero: View {
                     .accessibilityLabel(statusText)
             }
             Text(value ?? "—")
-                .font(.system(size: 64, weight: .bold, design: .rounded))
+                .font(.system(size: palette.heroPoints, weight: .bold, design: .rounded))
                 .foregroundStyle(palette.text)
                 .minimumScaleFactor(0.4)
                 .lineLimit(1)
@@ -219,6 +219,31 @@ struct ShowWorkBox: View {
     }
 }
 
+func weatherGlance(_ job: JobSetup) -> String? {
+    guard job.airTempF != nil || job.rainNext24hIn != nil || job.surfaceWet else { return nil }
+    if job.surfaceWet { return "Surface wet" }
+    if let rain = rainCheck(totalRainIn: job.rainNext24hIn), rain.status == .fail {
+        return "Rain hold"
+    }
+    if let rain = rainCheck(totalRainIn: job.rainNext24hIn), rain.status == .warn {
+        return "Rain watch"
+    }
+    guard let air = job.airTempF else { return nil }
+    let check = placementCheck(airTempF: air, thicknessIn: job.thicknessIn)
+    let word: String
+    switch check?.status {
+    case .pass:
+        word = "temp ok"
+    case .warn:
+        word = "borderline"
+    case .fail:
+        word = "too cold"
+    case nil:
+        word = "temp set"
+    }
+    return "\(displayNumber(air))°F · \(word)"
+}
+
 struct JobStrip: View {
     let job: JobSetup
 
@@ -232,6 +257,10 @@ struct JobStrip: View {
                 .font(.title3.weight(.semibold))
             Text(job.course.label)
                 .font(.body)
+            if let glance = weatherGlance(job) {
+                Text(glance)
+                    .font(.title3.weight(.bold))
+            }
         }
         .foregroundStyle(palette.accentText)
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -255,6 +284,24 @@ extension View {
                 }
                 .font(.title3.weight(.bold))
             }
+        }
+    }
+}
+
+struct UseRunLengthButton: View {
+    var fill: (String) -> Void
+
+    @Environment(AppModel.self) private var model
+
+    var body: some View {
+        let feet = model.runMeasure.lengthForCalcs
+        if feet > 0 {
+            Button("Use map length · \(FieldFormat.groupedRound(feet)) ft") {
+                model.checkpoint()
+                fill(displayNumber(feet))
+                FieldHaptics.tap()
+            }
+            .buttonStyle(FieldPrimaryButtonStyle())
         }
     }
 }
