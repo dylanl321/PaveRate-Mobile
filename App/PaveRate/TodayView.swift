@@ -7,8 +7,6 @@ struct TodayView: View {
     @Environment(AppModel.self) private var model
     @Environment(\.fieldPalette) private var palette
     @State private var loadSheet: LoadSheetRequest?
-    @State private var confirmNewDay = false
-    @State private var noteText = ""
     @State private var toast: String?
 
     var body: some View {
@@ -18,25 +16,16 @@ struct TodayView: View {
                 if model.plantCall.shouldCall {
                     StatusBanner(kind: .warn, message: model.plantCall.message, detail: "Tons ordered are on Feet Left.")
                 }
-                JobStrip(job: model.job)
+                JobChip()
                 WeatherStrip(autoRefresh: true)
                 runGlance
                 loads
-                SectionLabel(text: "Day note and photos")
-                PhotoNoteSection()
-                BigNumberField(
-                    label: "Note for the day",
-                    hint: "Saved with the day. Optional.",
-                    unit: "",
-                    numeric: false,
-                    placeholder: "What happened today",
-                    text: $noteText
-                )
-                ShareBar(
-                    summary: model.dailySummary(),
-                    images: NoteImageStore.labeledImages(notes: model.photoNotes, loads: model.loads)
-                )
-                newDay
+                if model.todayHasRecord {
+                    Text("Done for the day? Close it on the Days tab: add the note and photos, send it, and save.")
+                        .font(.body.weight(.semibold))
+                        .foregroundStyle(palette.muted)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
             }
             .padding(palette.pagePadding)
             .padding(.bottom, palette.tightSpacing)
@@ -48,32 +37,7 @@ struct TodayView: View {
         .safeAreaInset(edge: .bottom, spacing: 0) {
             dock
         }
-        .toolbar {
-            ToolbarItemGroup(placement: .topBarTrailing) {
-                ScreenModeMenu()
-                NavigationLink {
-                    HistoryView()
-                } label: {
-                    Image(systemName: "clock.arrow.circlepath")
-                        .font(.title2.weight(.bold))
-                        .frame(minWidth: 44, minHeight: 44)
-                }
-                .accessibilityLabel(model.archives.isEmpty ? "Saved days" : "Saved days, \(model.archives.count)")
-                .accessibilityHint("Opens shifts that were kept when a new day started.")
-                NavigationLink {
-                    SettingsView()
-                } label: {
-                    Image(systemName: "gearshape.fill")
-                        .font(.title2.weight(.bold))
-                        .frame(minWidth: 44, minHeight: 44)
-                }
-                .accessibilityLabel("Settings")
-            }
-        }
-        .onAppear { noteText = model.dayNote }
-        .onChange(of: noteText) { _, newValue in
-            if newValue != model.dayNote { model.dayNote = newValue }
-        }
+        .screenModeToolbar()
         .sheet(item: $loadSheet) { request in
             AddLoadSheet(existing: request.existing, startWithCamera: request.camera) { message in
                 show(message)
@@ -83,17 +47,6 @@ struct TodayView: View {
             guard toast != nil else { return }
             try? await Task.sleep(for: .seconds(6))
             withAnimation { toast = nil }
-        }
-        .confirmationDialog("Start a new day?", isPresented: $confirmNewDay, titleVisibility: .visible) {
-            Button("Save this day, then clear it", role: .destructive) {
-                model.startNewDay()
-                noteText = ""
-                FieldHaptics.tap()
-                show("New day started. The last one is in Saved days.")
-            }
-            Button("Keep working", role: .cancel) {}
-        } message: {
-            Text("The shift is written to Saved days first. The plan, the width, and the mix stay.")
         }
     }
 
@@ -107,7 +60,6 @@ struct TodayView: View {
             if let toast {
                 UndoToast(message: toast, canUndo: model.canUndo) {
                     model.undoLastChange()
-                    noteText = model.dayNote
                     FieldHaptics.tap()
                     withAnimation { self.toast = nil }
                 }
@@ -326,19 +278,6 @@ struct TodayView: View {
         if let feet = load.coveredFeet { parts.append("\(FieldFormat.groupedRound(feet)) ft") }
         if load.ticketPhotoFilename != nil { parts.append("photo") }
         return parts.isEmpty ? "Ticket" : parts.joined(separator: " · ")
-    }
-
-    @ViewBuilder
-    private var newDay: some View {
-        if model.todayHasRecord {
-            Button("New day") { confirmNewDay = true }
-                .buttonStyle(FieldSecondaryButtonStyle())
-                .accessibilityHint("Saves this shift on the phone, then clears loads, the paved track, photos, and the note.")
-        } else {
-            Text("New day appears once this shift has a load, a track, a photo, weather, or a note.")
-                .font(.body.weight(.semibold))
-                .foregroundStyle(palette.muted)
-        }
     }
 }
 

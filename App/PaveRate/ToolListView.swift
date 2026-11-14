@@ -6,18 +6,15 @@ struct ToolListView: View {
     @Environment(\.fieldPalette) private var palette
 
     private let groups: [ToolGroup] = [
-        ToolGroup(title: "Check the mat", tools: [.spreadRate, .stickCheck]),
-        ToolGroup(title: "Plan the day", tools: [.feetLeft, .distancePlanner, .tonnage, .milling]),
-        ToolGroup(title: "Conditions", tools: [.tack, .pavingWindow])
+        ToolGroup(title: "Is the mat right?", tools: [.spreadRate, .stickCheck]),
+        ToolGroup(title: "Will the day work out?", tools: [.feetLeft, .distancePlanner, .tonnage, .milling]),
+        ToolGroup(title: "Can we pave?", tools: [.tack, .pavingWindow])
     ]
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: palette.stackSpacing) {
-                JobStrip(job: model.job)
-                Text("Shared setup is on the Job tab. Every calculator uses it.")
-                    .font(.body)
-                    .foregroundStyle(palette.muted)
+                JobChip()
 
                 ForEach(groups) { group in
                     VStack(alignment: .leading, spacing: palette.tightSpacing) {

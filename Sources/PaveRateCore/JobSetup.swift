@@ -91,14 +91,14 @@ public enum FieldTool: String, CaseIterable, Codable, Sendable, Identifiable {
 
     public var blurb: String {
         switch self {
-        case .spreadRate: return "Target vs. actual lbs/SY"
-        case .feetLeft: return "Remaining length from tonnage"
-        case .distancePlanner: return "How far your tons will reach"
-        case .tonnage: return "Tons to order for a length"
-        case .tack: return "Gallons of tack to shoot"
-        case .stickCheck: return "Loose height behind the screed"
-        case .milling: return "Tons and trucks to mill a depth"
-        case .pavingWindow: return "Table 4 minimum air temperature"
+        case .spreadRate: return "Am I putting down the right rate?"
+        case .feetLeft: return "How many feet are left today?"
+        case .distancePlanner: return "How far will these tons go?"
+        case .tonnage: return "How many tons should I order?"
+        case .tack: return "How much tack do I need?"
+        case .stickCheck: return "Is the loose mat the right height?"
+        case .milling: return "How many tons and trucks will milling make?"
+        case .pavingWindow: return "Is it warm enough to pave?"
         }
     }
 }

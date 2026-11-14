@@ -329,7 +329,7 @@ struct PavingWindowTool: View {
         } content: {
             WeatherStrip()
             if model.job.airTempF == nil {
-                Text("Enter the air temperature on the Job tab to check this lift.")
+                Text("Enter the air temperature in job setup to check this lift. Tap the job name at the top of Calc.")
                     .font(.title3)
                     .foregroundStyle(palette.text)
             }

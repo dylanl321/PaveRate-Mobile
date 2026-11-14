@@ -54,13 +54,6 @@ struct RootView: View {
             }
 
             NavigationStack {
-                ToolListView()
-            }
-            .tabItem {
-                Label("Calc", systemImage: "plus.forwardslash.minus")
-            }
-
-            NavigationStack {
                 MapRunView()
             }
             .tabItem {
@@ -68,10 +61,18 @@ struct RootView: View {
             }
 
             NavigationStack {
-                JobSetupView()
+                ToolListView()
             }
             .tabItem {
-                Label("Job", systemImage: "road.lanes")
+                Label("Calc", systemImage: "plus.forwardslash.minus")
+            }
+
+            // Job setup is a sheet from the job card on Today and Calc. Settings lives on Days.
+            NavigationStack {
+                DaysView()
+            }
+            .tabItem {
+                Label("Days", systemImage: "calendar")
             }
         }
     }

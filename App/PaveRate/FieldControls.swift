@@ -438,6 +438,46 @@ struct JobStrip: View {
     }
 }
 
+/// The job card at the top of Today and Calc. Tapping it opens job setup as a sheet,
+/// so setup is one tap away without taking a whole tab.
+struct JobChip: View {
+    @Environment(AppModel.self) private var model
+    @Environment(\.fieldPalette) private var palette
+    @State private var showSetup = false
+
+    var body: some View {
+        Button {
+            showSetup = true
+        } label: {
+            HStack(alignment: .center, spacing: palette.tightSpacing) {
+                JobStrip(job: model.job)
+                    .overlay(alignment: .topTrailing) {
+                        Text("Edit")
+                            .font(.body.weight(.semibold))
+                            .foregroundStyle(palette.accentText)
+                            .padding(palette.cardPadding)
+                            .accessibilityHidden(true)
+                    }
+            }
+        }
+        .buttonStyle(FieldPressStyle())
+        .accessibilityHint("Opens job setup: width, thickness, mix, and trucks.")
+        .sheet(isPresented: $showSetup) {
+            NavigationStack {
+                JobSetupView()
+                    .toolbar {
+                        ToolbarItem(placement: .confirmationAction) {
+                            Button("Done") { showSetup = false }
+                                .font(.title3.weight(.bold))
+                                .frame(minWidth: 44, minHeight: 44)
+                        }
+                    }
+            }
+            .environment(\.fieldPalette, palette)
+        }
+    }
+}
+
 struct KeypadDoneButton: View {
     @Environment(\.fieldPalette) private var palette
 
