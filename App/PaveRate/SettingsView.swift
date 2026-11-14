@@ -4,6 +4,7 @@ import PaveRateCore
 struct SettingsView: View {
     @Environment(AppModel.self) private var model
     @Environment(\.fieldPalette) private var palette
+    @AppStorage(FieldDensity.storageKey) private var densityRaw = FieldDensity.field.rawValue
 
     @State private var windText = ""
     @State private var strongText = ""
@@ -14,7 +15,19 @@ struct SettingsView: View {
     var body: some View {
         @Bindable var model = model
         ScrollView {
-            VStack(alignment: .leading, spacing: 18) {
+            VStack(alignment: .leading, spacing: palette.stackSpacing) {
+                SectionLabel(text: "Layout")
+                Text("Field keeps the thick buttons. Compact fits more on the screen. The colors do not change.")
+                    .font(.body.weight(.semibold))
+                    .foregroundStyle(palette.text)
+                    .fixedSize(horizontal: false, vertical: true)
+                FieldSegmented(
+                    label: "Layout",
+                    options: Array(FieldDensity.allCases),
+                    title: { $0.title },
+                    selection: densityBinding
+                )
+
                 Text("These stay on this phone. The mix math stays in feet, tons, pounds per square yard, and °F.")
                     .font(.title3.weight(.semibold))
                     .foregroundStyle(palette.text)
@@ -101,7 +114,7 @@ struct SettingsView: View {
                     .foregroundStyle(palette.text)
                     .fixedSize(horizontal: false, vertical: true)
             }
-            .padding(20)
+            .padding(palette.pagePadding)
         }
         .fieldScroll()
         .navigationTitle("Settings")
@@ -113,6 +126,13 @@ struct SettingsView: View {
         .onChange(of: plantText) { _, _ in syncNumbers() }
         .onChange(of: widthText) { _, _ in syncNumbers() }
         .onChange(of: thicknessText) { _, _ in syncNumbers() }
+    }
+
+    private var densityBinding: Binding<FieldDensity> {
+        Binding(
+            get: { FieldDensity(rawValue: densityRaw) ?? .field },
+            set: { densityRaw = $0.rawValue }
+        )
     }
 
     private func loadDrafts() {

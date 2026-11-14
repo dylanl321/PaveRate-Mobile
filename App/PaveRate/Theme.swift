@@ -41,6 +41,79 @@ extension PlacementStatus {
     }
 }
 
+/// Field is the glove layout. Compact is standard iOS sizing. Colors do not change with this.
+enum FieldDensity: String, CaseIterable, Hashable {
+    case field
+    case compact
+
+    static let storageKey = "paverate.layoutDensity"
+
+    var title: String {
+        switch self {
+        case .field: return "Field"
+        case .compact: return "Compact"
+        }
+    }
+
+    var detail: String {
+        switch self {
+        case .field: return "Thick buttons and large type for gloves and sun."
+        case .compact: return "Standard size. More of the shift on the screen."
+        }
+    }
+
+    func layout(for appearance: FieldAppearance) -> FieldLayout {
+        switch self {
+        case .compact:
+            return .compact
+        case .field:
+            switch appearance {
+            case .sunlight: return .fieldSun
+            case .glare: return .fieldGlare
+            case .night: return .fieldNight
+            }
+        }
+    }
+}
+
+/// Sizes for every screen. Views read these off the palette instead of branching on the mode.
+struct FieldLayout: Equatable {
+    var minControl: CGFloat
+    var heroPoints: CGFloat
+    var fieldPoints: CGFloat
+    var pagePadding: CGFloat
+    var stackSpacing: CGFloat
+    var tightSpacing: CGFloat
+    var cardPadding: CGFloat
+    var cornerRadius: CGFloat
+    var fontScale: CGFloat
+    var keypadHeight: CGFloat
+    var sliderMin: CGFloat
+    var tagPoints: CGFloat
+    var fieldTypeCap: CGFloat
+
+    static let fieldSun = FieldLayout(
+        minControl: 76, heroPoints: 68, fieldPoints: 36,
+        pagePadding: 20, stackSpacing: 18, tightSpacing: 10, cardPadding: 16,
+        cornerRadius: 14, fontScale: 1, keypadHeight: 56, sliderMin: 52, tagPoints: 16, fieldTypeCap: 1.6
+    )
+    static let fieldGlare = FieldLayout(
+        minControl: 88, heroPoints: 76, fieldPoints: 40,
+        pagePadding: 20, stackSpacing: 18, tightSpacing: 10, cardPadding: 18,
+        cornerRadius: 16, fontScale: 1, keypadHeight: 60, sliderMin: 56, tagPoints: 17, fieldTypeCap: 1.6
+    )
+    static let fieldNight = FieldLayout(
+        minControl: 72, heroPoints: 64, fieldPoints: 34,
+        pagePadding: 20, stackSpacing: 16, tightSpacing: 8, cardPadding: 16,
+        cornerRadius: 14, fontScale: 1, keypadHeight: 52, sliderMin: 48, tagPoints: 15, fieldTypeCap: 1.6
+    )
+    static let compact = FieldLayout(
+        minControl: 44, heroPoints: 34, fieldPoints: 20,
+        pagePadding: 12, stackSpacing: 10, tightSpacing: 6, cardPadding: 10,
+        cornerRadius: 10, fontScale: 1, keypadHeight: 44, sliderMin: 44, tagPoints: 11, fieldTypeCap: 1.25
+    )
+}
+
 /// High-contrast colors from the web app's sunlight and dark theme tokens.
 struct FieldPalette {
     let background: Color
@@ -59,9 +132,21 @@ struct FieldPalette {
     let onWarn: Color
     let onBad: Color
     let borderWidth: CGFloat
-    let heroPoints: CGFloat
-    let fieldPoints: CGFloat
-    let minControl: CGFloat
+    var layout: FieldLayout
+
+    var heroPoints: CGFloat { layout.heroPoints }
+    var fieldPoints: CGFloat { layout.fieldPoints }
+    var minControl: CGFloat { layout.minControl }
+    var pagePadding: CGFloat { layout.pagePadding }
+    var stackSpacing: CGFloat { layout.stackSpacing }
+    var tightSpacing: CGFloat { layout.tightSpacing }
+    var cardPadding: CGFloat { layout.cardPadding }
+    var cornerRadius: CGFloat { layout.cornerRadius }
+    var fontScale: CGFloat { layout.fontScale }
+    var keypadHeight: CGFloat { layout.keypadHeight }
+    var sliderMin: CGFloat { layout.sliderMin }
+    var tagPoints: CGFloat { layout.tagPoints }
+    var fieldTypeCap: CGFloat { layout.fieldTypeCap }
 
     static let sunlight = FieldPalette(
         background: Color(red: 1, green: 1, blue: 1),
@@ -79,9 +164,7 @@ struct FieldPalette {
         onWarn: .white,
         onBad: .white,
         borderWidth: 3,
-        heroPoints: 68,
-        fieldPoints: 36,
-        minControl: 76
+        layout: .fieldSun
     )
 
     static let glare = FieldPalette(
@@ -100,9 +183,7 @@ struct FieldPalette {
         onWarn: .white,
         onBad: .white,
         borderWidth: 4,
-        heroPoints: 76,
-        fieldPoints: 40,
-        minControl: 88
+        layout: .fieldGlare
     )
 
     static let night = FieldPalette(
@@ -121,17 +202,18 @@ struct FieldPalette {
         onWarn: .black,
         onBad: .black,
         borderWidth: 1,
-        heroPoints: 64,
-        fieldPoints: 34,
-        minControl: 72
+        layout: .fieldNight
     )
 
-    static func palette(for appearance: FieldAppearance) -> FieldPalette {
+    static func palette(for appearance: FieldAppearance, density: FieldDensity = .field) -> FieldPalette {
+        var base: FieldPalette
         switch appearance {
-        case .sunlight: return .sunlight
-        case .night: return .night
-        case .glare: return .glare
+        case .sunlight: base = .sunlight
+        case .glare: base = .glare
+        case .night: base = .night
         }
+        base.layout = density.layout(for: appearance)
+        return base
     }
 
     func status(_ kind: StatusKind) -> Color {
@@ -185,11 +267,13 @@ enum OutdoorScale {
 
 struct OutdoorFont: ViewModifier {
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @Environment(\.fieldPalette) private var palette
     var base: CGFloat
     var weight: Font.Weight = .bold
 
     func body(content: Content) -> some View {
-        content.font(.system(size: base * OutdoorScale.multiplier(dynamicTypeSize), weight: weight, design: .rounded))
+        let size = base * palette.fontScale * OutdoorScale.multiplier(dynamicTypeSize)
+        content.font(.system(size: size, weight: weight, design: .rounded))
     }
 }
 

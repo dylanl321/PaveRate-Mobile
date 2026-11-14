@@ -8,29 +8,32 @@ struct BigNumberField: View {
     let unit: String
     var numeric: Bool = true
     var placeholder: String? = nil
-    /// Set when the screen has to react to the keypad, such as the map end field.
-    var focus: FocusState<Bool>.Binding? = nil
     @Binding var text: String
+    /// The map uses this to shrink while the keypad is up.
+    var onFocusChange: ((Bool) -> Void)? = nil
+    /// Done commits the field, then runs this. The map places the end here.
+    var onSubmit: (() -> Void)? = nil
 
     @Environment(\.fieldPalette) private var palette
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @FocusState private var focused: Bool
 
     private var spokenLabel: String {
         unit.isEmpty ? label : "\(label), \(unit)"
     }
 
     private var fieldSize: CGFloat {
-        palette.fieldPoints * min(OutdoorScale.multiplier(dynamicTypeSize), 1.6)
+        palette.fieldPoints * palette.fontScale * min(OutdoorScale.multiplier(dynamicTypeSize), palette.fieldTypeCap)
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: palette.tightSpacing) {
             Text(label)
                 .font(.title3.weight(.bold))
                 .foregroundStyle(palette.text)
                 .fixedSize(horizontal: false, vertical: true)
                 .accessibilityHidden(true)
-            HStack(alignment: .firstTextBaseline, spacing: 12) {
+            HStack(alignment: .firstTextBaseline, spacing: palette.tightSpacing) {
                 entry
                     .layoutPriority(1)
                 if !unit.isEmpty {
@@ -42,12 +45,12 @@ struct BigNumberField: View {
                         .accessibilityHidden(true)
                 }
             }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 8)
+            .padding(.horizontal, palette.cardPadding)
+            .padding(.vertical, palette.tightSpacing)
             .frame(minHeight: palette.minControl)
-            .background(palette.surface, in: RoundedRectangle(cornerRadius: 14))
+            .background(palette.surface, in: RoundedRectangle(cornerRadius: palette.cornerRadius))
             .overlay(
-                RoundedRectangle(cornerRadius: 14)
+                RoundedRectangle(cornerRadius: palette.cornerRadius)
                     .stroke(palette.border, lineWidth: palette.borderWidth)
             )
             if let hint {
@@ -72,7 +75,6 @@ struct BigNumberField: View {
                 TextField(placeholder ?? "Name", text: $text, axis: .vertical)
                     .lineLimit(1...6)
                     .textInputAutocapitalization(.words)
-                    .submitLabel(.done)
             )
         }
     }
@@ -81,21 +83,108 @@ struct BigNumberField: View {
         view
             .font(.system(size: fieldSize, weight: .bold, design: .rounded))
             .foregroundStyle(palette.text)
-            .onSubmit { FieldKeyboard.dismiss() }
-            .modifier(OptionalFocus(focus: focus))
+            .focused($focused)
+            .submitLabel(.done)
+            .onSubmit { FieldKeyboard.done() }
+            .onChange(of: focused) { _, isOn in
+                onFocusChange?(isOn)
+                if isOn { registerSubmit() }
+            }
             .accessibilityLabel(spokenLabel)
+    }
+
+    private func registerSubmit() {
+        let binding = $text
+        let submit = onSubmit
+        let isNumeric = numeric
+        FieldKeyboard.submit = {
+            if isNumeric, let value = parseField(binding.wrappedValue) {
+                let shown = displayNumber(value)
+                if binding.wrappedValue != shown {
+                    binding.wrappedValue = shown
+                }
+            }
+            submit?()
+        }
     }
 }
 
-private struct OptionalFocus: ViewModifier {
-    var focus: FocusState<Bool>.Binding?
+/// One keypad Done button. It commits the number, runs the screen's submit, then closes.
+@MainActor
+enum FieldKeyboard {
+    static var submit: (() -> Void)?
 
-    @ViewBuilder
-    func body(content: Content) -> some View {
-        if let focus {
-            content.focused(focus)
-        } else {
-            content
+    static func done() {
+        let action = submit
+        submit = nil
+        action?()
+        dismiss()
+    }
+
+    static func dismiss() {
+        submit = nil
+        UIApplication.shared.sendAction(
+            #selector(UIResponder.resignFirstResponder),
+            to: nil,
+            from: nil,
+            for: nil
+        )
+    }
+}
+
+/// Closes the keypad when the tap is not on the field or a button. The map tap uses this too.
+private struct KeyboardDismissInstaller: UIViewRepresentable {
+    func makeUIView(context: Context) -> UIView {
+        let view = UIView(frame: .zero)
+        view.isUserInteractionEnabled = false
+        return view
+    }
+
+    func updateUIView(_ uiView: UIView, context: Context) {
+        DispatchQueue.main.async {
+            guard let window = uiView.window, context.coordinator.recognizer == nil else { return }
+            let tap = UITapGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.dismiss))
+            tap.cancelsTouchesInView = false
+            tap.delegate = context.coordinator
+            window.addGestureRecognizer(tap)
+            context.coordinator.recognizer = tap
+        }
+    }
+
+    static func dismantleUIView(_ uiView: UIView, coordinator: Coordinator) {
+        if let tap = coordinator.recognizer {
+            tap.view?.removeGestureRecognizer(tap)
+            coordinator.recognizer = nil
+        }
+    }
+
+    func makeCoordinator() -> Coordinator { Coordinator() }
+
+    final class Coordinator: NSObject, UIGestureRecognizerDelegate {
+        var recognizer: UITapGestureRecognizer?
+
+        @objc func dismiss() {
+            DispatchQueue.main.async {
+                FieldKeyboard.dismiss()
+            }
+        }
+
+        func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
+            var view: UIView? = touch.view
+            while let current = view {
+                if current is UITextField || current is UITextView || current is UIControl { return false }
+                let name = NSStringFromClass(type(of: current))
+                if name.contains("Keyboard") || name.contains("Input") { return false }
+                view = current.superview
+            }
+            return true
+        }
+
+        func gestureRecognizer(
+            _ gestureRecognizer: UIGestureRecognizer,
+            shouldRecognizeSimultaneouslyWith other: UIGestureRecognizer
+        ) -> Bool {
+            true
         }
     }
 }
@@ -125,9 +214,9 @@ struct ChoiceButton: View {
             .padding(.vertical, 10)
             .frame(minHeight: palette.minControl)
             .foregroundStyle(selected ? palette.accentText : palette.text)
-            .background(selected ? palette.accent : palette.surface, in: RoundedRectangle(cornerRadius: 14))
+            .background(selected ? palette.accent : palette.surface, in: RoundedRectangle(cornerRadius: palette.cornerRadius))
             .overlay(
-                RoundedRectangle(cornerRadius: 14)
+                RoundedRectangle(cornerRadius: palette.cornerRadius)
                     .stroke(palette.border, lineWidth: palette.borderWidth)
             )
         }
@@ -178,10 +267,10 @@ struct ResultHero: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(18)
-        .background(palette.surfaceAlt, in: RoundedRectangle(cornerRadius: 18))
+        .padding(palette.cardPadding)
+        .background(palette.surfaceAlt, in: RoundedRectangle(cornerRadius: palette.cornerRadius))
         .overlay(
-            RoundedRectangle(cornerRadius: 18)
+            RoundedRectangle(cornerRadius: palette.cornerRadius)
                 .stroke(palette.border, lineWidth: palette.borderWidth)
         )
     }
@@ -205,8 +294,8 @@ struct StatusBanner: View {
         }
         .foregroundStyle(palette.onStatus(kind))
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(16)
-        .background(palette.status(kind), in: RoundedRectangle(cornerRadius: 14))
+        .padding(palette.cardPadding)
+        .background(palette.status(kind), in: RoundedRectangle(cornerRadius: palette.cornerRadius))
         .accessibilityElement(children: .combine)
         .accessibilityLabel(detail.map { "\(message). \($0)" } ?? message)
     }
@@ -221,7 +310,7 @@ struct ShowWorkBox: View {
     @State private var open = false
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: palette.tightSpacing) {
             Button {
                 open.toggle()
             } label: {
@@ -241,7 +330,7 @@ struct ShowWorkBox: View {
                     }
                 }
                 .foregroundStyle(palette.text)
-                .frame(minHeight: 56)
+                .frame(minHeight: palette.keypadHeight)
             }
             .buttonStyle(.plain)
             .accessibilityLabel(open ? "Hide your work" : "Show your work")
@@ -268,8 +357,8 @@ struct ShowWorkBox: View {
                             .fixedSize(horizontal: false, vertical: true)
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(14)
-                    .background(palette.surface, in: RoundedRectangle(cornerRadius: 12))
+                    .padding(palette.cardPadding)
+                    .background(palette.surface, in: RoundedRectangle(cornerRadius: palette.cornerRadius))
                 }
                 ForEach(Array(notes.enumerated()), id: \.offset) { _, note in
                     Text(note)
@@ -278,10 +367,10 @@ struct ShowWorkBox: View {
                 }
             }
         }
-        .padding(16)
-        .background(palette.surfaceAlt, in: RoundedRectangle(cornerRadius: 16))
+        .padding(palette.cardPadding)
+        .background(palette.surfaceAlt, in: RoundedRectangle(cornerRadius: palette.cornerRadius))
         .overlay(
-            RoundedRectangle(cornerRadius: 16)
+            RoundedRectangle(cornerRadius: palette.cornerRadius)
                 .stroke(palette.border, lineWidth: palette.borderWidth)
         )
     }
@@ -332,39 +421,44 @@ struct JobStrip: View {
         }
         .foregroundStyle(palette.accentText)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(16)
-        .background(palette.accent, in: RoundedRectangle(cornerRadius: 16))
+        .padding(palette.cardPadding)
+        .background(palette.accent, in: RoundedRectangle(cornerRadius: palette.cornerRadius))
     }
 }
 
-enum FieldKeyboard {
-    static func dismiss() {
-        UIApplication.shared.sendAction(
-            #selector(UIResponder.resignFirstResponder),
-            to: nil,
-            from: nil,
-            for: nil
-        )
+struct KeypadDoneButton: View {
+    @Environment(\.fieldPalette) private var palette
+
+    var body: some View {
+        Button("Done") { FieldKeyboard.done() }
+            .font(.title2.weight(.bold))
+            .padding(.horizontal, palette.cardPadding)
+            .padding(.vertical, palette.tightSpacing)
+            .frame(minWidth: palette.minControl * 1.7, minHeight: palette.keypadHeight)
+            .foregroundStyle(palette.accentText)
+            .background(palette.accent, in: Capsule())
+            .accessibilityLabel("Done")
+            .accessibilityHint("Saves this number and closes the keypad.")
     }
 }
 
 extension View {
-    /// Decimal pad has no return key. Every screen that contains a field calls this.
+    /// Number pads have no return key. One Done button, on the screens that contain a field.
     func fieldKeyboardDone() -> some View {
         toolbar {
             ToolbarItemGroup(placement: .keyboard) {
                 Spacer()
-                Button("Done") {
-                    FieldKeyboard.dismiss()
-                }
-                .font(.title2.weight(.bold))
-                .accessibilityHint("Dismisses the keypad")
+                KeypadDoneButton()
             }
         }
     }
 
     func fieldScroll() -> some View {
         scrollDismissesKeyboard(.interactively)
+    }
+
+    func installKeyboardDismiss() -> some View {
+        background(KeyboardDismissInstaller())
     }
 }
 
@@ -384,7 +478,7 @@ struct FieldSegmented<Value: Hashable>: View {
     @Environment(\.fieldPalette) private var palette
 
     var body: some View {
-        HStack(spacing: 8) {
+        HStack(spacing: palette.tightSpacing) {
             ForEach(options, id: \.self) { option in
                 let selected = option == selection
                 Button {
@@ -393,14 +487,15 @@ struct FieldSegmented<Value: Hashable>: View {
                 } label: {
                     Text(title(option))
                         .font(.title3.weight(.bold))
-                        .lineLimit(1)
+                        .lineLimit(2)
                         .minimumScaleFactor(0.65)
+                        .multilineTextAlignment(.center)
                         .frame(maxWidth: .infinity)
-                        .frame(minHeight: max(56, palette.minControl * 0.72))
+                        .frame(minHeight: palette.keypadHeight)
                         .foregroundStyle(selected ? palette.accentText : palette.text)
-                        .background(selected ? palette.accent : palette.surface, in: RoundedRectangle(cornerRadius: 12))
+                        .background(selected ? palette.accent : palette.surface, in: RoundedRectangle(cornerRadius: palette.cornerRadius))
                         .overlay(
-                            RoundedRectangle(cornerRadius: 12)
+                            RoundedRectangle(cornerRadius: palette.cornerRadius)
                                 .stroke(palette.border, lineWidth: palette.borderWidth)
                         )
                 }
@@ -438,10 +533,10 @@ struct FieldToggle: View {
             }
         }
         .tint(onTint ?? palette.good)
-        .padding(16)
+        .padding(palette.cardPadding)
         .frame(maxWidth: .infinity, minHeight: palette.minControl, alignment: .leading)
-        .background(palette.surface, in: RoundedRectangle(cornerRadius: 14))
-        .overlay(RoundedRectangle(cornerRadius: 14).stroke(palette.border, lineWidth: palette.borderWidth))
+        .background(palette.surface, in: RoundedRectangle(cornerRadius: palette.cornerRadius))
+        .overlay(RoundedRectangle(cornerRadius: palette.cornerRadius).stroke(palette.border, lineWidth: palette.borderWidth))
     }
 }
 
@@ -460,11 +555,11 @@ struct FieldWideButton: View {
                 .lineLimit(2)
                 .minimumScaleFactor(0.75)
                 .frame(maxWidth: .infinity)
-                .frame(minHeight: max(56, palette.minControl - 12))
+                .frame(minHeight: max(palette.keypadHeight, palette.minControl - 12))
                 .foregroundStyle(destructive ? palette.bad : palette.text)
-                .background(palette.surface, in: RoundedRectangle(cornerRadius: 14))
+                .background(palette.surface, in: RoundedRectangle(cornerRadius: palette.cornerRadius))
                 .overlay(
-                    RoundedRectangle(cornerRadius: 14)
+                    RoundedRectangle(cornerRadius: palette.cornerRadius)
                         .stroke(destructive ? palette.bad : palette.border, lineWidth: palette.borderWidth)
                 )
         }

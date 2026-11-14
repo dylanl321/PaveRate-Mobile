@@ -96,7 +96,7 @@ This repository was built on Linux, which cannot compile or launch an iOS target
 
 ## TestFlight
 
-The project ships an app icon (`App/PaveRate/Assets.xcassets`), declares no non-exempt encryption, and is at version 1.0 build 4. Builds 2 and 3 are already on TestFlight. Archive the next one with `scripts/testflight.sh`. Do not pass `BUMP=1` unless 4 has already been uploaded.
+The project ships an app icon (`App/PaveRate/Assets.xcassets`), declares no non-exempt encryption, and is at version 1.0 build 6. Builds 2, 3, 4, and 5 are already on TestFlight. Archive the next one with `scripts/testflight.sh`. Do not pass `BUMP=1` unless 6 has already been uploaded.
 
 The map follows the road: start, direction, then an end (a tap on the highlighted road, a length, or the slider). If the road service is down, drop points by hand. Milling is with the other calculators. The Watch app (`com.paverate.ios.watchkitapp`) shows go/hold, feet left, and tons left from the phone over Watch Connectivity. It does not use an App Group. The Home Screen widget still reads `group.com.paverate.ios` only when that group is on the profile; until then it says “Open PaveRate”. There is no account and no web sync.
 

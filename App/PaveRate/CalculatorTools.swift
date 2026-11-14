@@ -13,7 +13,7 @@ struct SpreadRateTool: View {
             customTargetLbsSy: model.inputs.spreadOverride ? parseField(model.inputs.spreadCustomRate) : nil,
             job: model.job
         )
-        VStack(alignment: .leading, spacing: 18) {
+        VStack(alignment: .leading, spacing: palette.stackSpacing) {
             if let rain = report.rain, rain.status != .pass {
                 StatusBanner(kind: rain.status.kind, message: rain.message, detail: rain.guidance)
             }
@@ -127,7 +127,7 @@ struct FeetLeftTool: View {
                 rateLbsSy: report.rateLbsSy
             )
             : nil
-        VStack(alignment: .leading, spacing: 18) {
+        VStack(alignment: .leading, spacing: palette.stackSpacing) {
             BigNumberField(label: "Tons ordered today", hint: "Plant tickets for the day.", unit: "tons", text: $model.inputs.feetOrdered)
             if model.loads.isEmpty {
                 BigNumberField(label: "Tons placed so far", unit: "tons", text: $model.inputs.feetPlaced)
@@ -167,6 +167,7 @@ struct FeetLeftTool: View {
 
 struct DistancePlannerTool: View {
     @Environment(AppModel.self) private var model
+    @Environment(\.fieldPalette) private var palette
 
     var body: some View {
         @Bindable var model = model
@@ -176,7 +177,7 @@ struct DistancePlannerTool: View {
             desiredDistanceFt: parseField(model.inputs.plannerDesired),
             job: model.job
         )
-        VStack(alignment: .leading, spacing: 18) {
+        VStack(alignment: .leading, spacing: palette.stackSpacing) {
             BigNumberField(label: "Tons in plant silo", unit: "tons", text: $model.inputs.plannerSilo)
             BigNumberField(label: "Tons in trucks headed to the job", unit: "tons", text: $model.inputs.plannerTrucks)
             ResultHero(
@@ -201,11 +202,12 @@ struct DistancePlannerTool: View {
 
 struct TonnageTool: View {
     @Environment(AppModel.self) private var model
+    @Environment(\.fieldPalette) private var palette
 
     var body: some View {
         @Bindable var model = model
         let report = AsphaltCalculator.tonnage(lengthFt: parseField(model.inputs.tonnageLength), job: model.job)
-        VStack(alignment: .leading, spacing: 18) {
+        VStack(alignment: .leading, spacing: palette.stackSpacing) {
             BigNumberField(label: "Length to pave", unit: "ft", text: $model.inputs.tonnageLength)
             UseRunLengthButton { model.inputs.tonnageLength = $0 }
             ResultHero(
@@ -224,11 +226,12 @@ struct TonnageTool: View {
 
 struct TackTool: View {
     @Environment(AppModel.self) private var model
+    @Environment(\.fieldPalette) private var palette
 
     var body: some View {
         @Bindable var model = model
         let report = AsphaltCalculator.tack(lengthFt: parseField(model.inputs.tackLength), job: model.job)
-        VStack(alignment: .leading, spacing: 18) {
+        VStack(alignment: .leading, spacing: palette.stackSpacing) {
             BigNumberField(label: "Length to shoot", unit: "ft", text: $model.inputs.tackLength)
             UseRunLengthButton { model.inputs.tackLength = $0 }
             SectionLabel(text: "Application")
@@ -275,11 +278,12 @@ struct TackTool: View {
 
 struct StickCheckTool: View {
     @Environment(AppModel.self) private var model
+    @Environment(\.fieldPalette) private var palette
 
     var body: some View {
         @Bindable var model = model
         let report = AsphaltCalculator.stick(compactedIn: parseField(model.inputs.stickTarget))
-        VStack(alignment: .leading, spacing: 18) {
+        VStack(alignment: .leading, spacing: palette.stackSpacing) {
             BigNumberField(
                 label: "Target compacted thickness",
                 hint: "What the mat should be after the rollers.",
@@ -302,7 +306,7 @@ struct PavingWindowTool: View {
 
     var body: some View {
         let report = AsphaltCalculator.pavingWindow(job: model.job)
-        VStack(alignment: .leading, spacing: 18) {
+        VStack(alignment: .leading, spacing: palette.stackSpacing) {
             WeatherStrip()
             if model.job.airTempF == nil {
                 Text("Enter the air temperature on the Job tab to check this lift.")
@@ -337,9 +341,9 @@ struct PavingWindowTool: View {
                 }
                 .foregroundStyle(active ? palette.accentText : palette.text)
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(16)
-                .background(active ? palette.accent : palette.surface, in: RoundedRectangle(cornerRadius: 14))
-                .overlay(RoundedRectangle(cornerRadius: 14).stroke(palette.border, lineWidth: palette.borderWidth))
+                .padding(palette.cardPadding)
+                .background(active ? palette.accent : palette.surface, in: RoundedRectangle(cornerRadius: palette.cornerRadius))
+                .overlay(RoundedRectangle(cornerRadius: palette.cornerRadius).stroke(palette.border, lineWidth: palette.borderWidth))
             }
             ShowWorkBox(steps: [], notes: report.notes, emptyFormula: "Table lookup — no arithmetic")
         }
@@ -370,7 +374,7 @@ struct MillingTool: View {
             densityTonsPerCubicYard: parseField(densityText) ?? 0,
             truckTons: model.job.truckLoadTons
         )
-        VStack(alignment: .leading, spacing: 18) {
+        VStack(alignment: .leading, spacing: palette.stackSpacing) {
             Text("Width and truck size come from the job. Density is a field estimate, about 2 tons per cubic yard for asphalt millings.")
                 .font(.body.weight(.semibold))
                 .foregroundStyle(palette.text)

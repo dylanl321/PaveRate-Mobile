@@ -15,7 +15,7 @@ struct WeatherStrip: View {
 
     var body: some View {
         @Bindable var model = model
-        VStack(alignment: .leading, spacing: 14) {
+        VStack(alignment: .leading, spacing: palette.stackSpacing) {
             if let reading = model.cachedWeather, let decision = model.weatherDecision {
                 StatusBanner(kind: decision.status.kind, message: decision.headline, detail: detailLine(reading, decision: decision))
                 readingGrid(reading)
@@ -132,12 +132,13 @@ struct WeatherStrip: View {
                     .frame(minWidth: 116, alignment: .leading)
                     .frame(minHeight: 108)
                     .fixedSize(horizontal: true, vertical: false)
-                    .background(threat ? palette.warn : palette.surface, in: RoundedRectangle(cornerRadius: 14))
-                    .overlay(RoundedRectangle(cornerRadius: 14).stroke(palette.border, lineWidth: palette.borderWidth))
+                    .background(threat ? palette.warn : palette.surface, in: RoundedRectangle(cornerRadius: palette.cornerRadius))
+                    .overlay(RoundedRectangle(cornerRadius: palette.cornerRadius).stroke(palette.border, lineWidth: palette.borderWidth))
                     .accessibilityElement(children: .combine)
                 }
             }
         }
+        .fieldScroll()
     }
 
     private func pull() async {

@@ -15,7 +15,7 @@ struct JobSetupView: View {
     var body: some View {
         @Bindable var model = model
         ScrollView {
-            VStack(alignment: .leading, spacing: 22) {
+            VStack(alignment: .leading, spacing: palette.stackSpacing) {
                 VStack(alignment: .leading, spacing: 8) {
                     SectionLabel(text: "Screen")
                     FieldSegmented(
@@ -139,7 +139,7 @@ struct JobSetupView: View {
                     StatusBanner(kind: openGraded.status.kind, message: openGraded.message)
                 }
             }
-            .padding(20)
+            .padding(palette.pagePadding)
         }
         .fieldScroll()
         .navigationTitle("Job")
@@ -194,9 +194,9 @@ struct JobSetupView: View {
         }
         .foregroundStyle(palette.text)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(16)
-        .background(palette.surfaceAlt, in: RoundedRectangle(cornerRadius: 14))
-        .overlay(RoundedRectangle(cornerRadius: 14).stroke(palette.border, lineWidth: palette.borderWidth))
+        .padding(palette.cardPadding)
+        .background(palette.surfaceAlt, in: RoundedRectangle(cornerRadius: palette.cornerRadius))
+        .overlay(RoundedRectangle(cornerRadius: palette.cornerRadius).stroke(palette.border, lineWidth: palette.borderWidth))
     }
 
     @ViewBuilder
@@ -229,7 +229,7 @@ struct JobSetupView: View {
     ) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             BigNumberField(label: label, hint: hint, unit: unit, text: text)
-            HStack(spacing: 12) {
+            HStack(spacing: palette.tightSpacing) {
                 stepButton(title: "− \(displayNumber(step))", action: { apply(-step) })
                 stepButton(title: "+ \(displayNumber(step))", action: { apply(step) })
             }
@@ -245,8 +245,8 @@ struct JobSetupView: View {
                 .frame(maxWidth: .infinity)
                 .frame(minHeight: palette.minControl)
                 .foregroundStyle(palette.accentText)
-                .background(palette.accent, in: RoundedRectangle(cornerRadius: 14))
-                .overlay(RoundedRectangle(cornerRadius: 14).stroke(palette.border, lineWidth: palette.borderWidth))
+                .background(palette.accent, in: RoundedRectangle(cornerRadius: palette.cornerRadius))
+                .overlay(RoundedRectangle(cornerRadius: palette.cornerRadius).stroke(palette.border, lineWidth: palette.borderWidth))
         }
         .buttonStyle(FieldPressStyle())
     }

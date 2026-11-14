@@ -13,7 +13,7 @@ struct TodayView: View {
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 18) {
+            VStack(alignment: .leading, spacing: palette.stackSpacing) {
                 boardGlance
                 JobStrip(job: model.job)
                 WeatherStrip(autoRefresh: true)
@@ -59,8 +59,8 @@ struct TodayView: View {
                     .accessibilityHint("Puts back the last change on this phone.")
                 }
             }
-            .padding(20)
-            .padding(.bottom, 12)
+            .padding(palette.pagePadding)
+            .padding(.bottom, palette.tightSpacing)
         }
         .fieldScroll()
         .navigationTitle("Today")
@@ -144,7 +144,7 @@ struct TodayView: View {
     }
 
     private var loads: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: palette.stackSpacing) {
             SectionLabel(text: "Loads")
             if model.loads.isEmpty {
                 Text("No tickets yet. Tons placed on Feet Left come from this list once you add one.")
@@ -198,8 +198,8 @@ struct TodayView: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(14)
-        .background(palette.surface, in: RoundedRectangle(cornerRadius: 14))
-        .overlay(RoundedRectangle(cornerRadius: 14).stroke(palette.border, lineWidth: palette.borderWidth))
+        .background(palette.surface, in: RoundedRectangle(cornerRadius: palette.cornerRadius))
+        .overlay(RoundedRectangle(cornerRadius: palette.cornerRadius).stroke(palette.border, lineWidth: palette.borderWidth))
     }
 
     private var glareButton: some View {
@@ -235,7 +235,7 @@ struct AddLoadSheet: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(alignment: .leading, spacing: 18) {
+                VStack(alignment: .leading, spacing: palette.stackSpacing) {
                     BigNumberField(
                         label: "Truck",
                         hint: existing == nil && !truck.isEmpty ? "Filled from the last ticket. Change it if this is a different truck." : "Number on the side of the truck.",
@@ -263,8 +263,8 @@ struct AddLoadSheet: View {
                             .frame(maxWidth: .infinity)
                             .frame(minHeight: palette.minControl)
                             .foregroundStyle(palette.text)
-                            .background(palette.surface, in: RoundedRectangle(cornerRadius: 14))
-                            .overlay(RoundedRectangle(cornerRadius: 14).stroke(palette.border, lineWidth: palette.borderWidth))
+                            .background(palette.surface, in: RoundedRectangle(cornerRadius: palette.cornerRadius))
+                            .overlay(RoundedRectangle(cornerRadius: palette.cornerRadius).stroke(palette.border, lineWidth: palette.borderWidth))
                     }
                     if let yield = preview {
                         if let expected = yield.expectedFeet {
@@ -313,7 +313,7 @@ struct AddLoadSheet: View {
                     }
                     .buttonStyle(FieldPrimaryButtonStyle())
                 }
-                .padding(20)
+                .padding(palette.pagePadding)
             }
             .fieldScroll()
             .navigationTitle(existing == nil ? "Load" : "Edit load")

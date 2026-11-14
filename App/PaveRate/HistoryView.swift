@@ -7,7 +7,7 @@ struct HistoryView: View {
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 14) {
+            VStack(alignment: .leading, spacing: palette.stackSpacing) {
                 if model.archives.isEmpty {
                     Text("No saved days yet.")
                         .font(.title.weight(.bold))
@@ -30,17 +30,18 @@ struct HistoryView: View {
                         }
                         .foregroundStyle(palette.text)
                         .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(16)
+                        .padding(palette.cardPadding)
                         .frame(minHeight: 96)
-                        .background(palette.surface, in: RoundedRectangle(cornerRadius: 14))
-                        .overlay(RoundedRectangle(cornerRadius: 14).stroke(palette.border, lineWidth: palette.borderWidth))
+                        .background(palette.surface, in: RoundedRectangle(cornerRadius: palette.cornerRadius))
+                        .overlay(RoundedRectangle(cornerRadius: palette.cornerRadius).stroke(palette.border, lineWidth: palette.borderWidth))
                     }
                     .buttonStyle(.plain)
                     .accessibilityHint("Opens this saved day so you can read it or send it again.")
                 }
             }
-            .padding(20)
+            .padding(palette.pagePadding)
         }
+        .fieldScroll()
         .navigationTitle("Saved days")
         .background(palette.background.ignoresSafeArea())
     }
@@ -57,7 +58,7 @@ struct ArchiveDetailView: View {
         let summary = model.summary(for: record)
         let images = NoteImageStore.labeledImages(notes: record.photoNotes, loads: record.loads)
         ScrollView {
-            VStack(alignment: .leading, spacing: 16) {
+            VStack(alignment: .leading, spacing: palette.stackSpacing) {
                 Text(summary.plainText)
                     .font(.body.weight(.semibold))
                     .foregroundStyle(palette.text)
@@ -78,8 +79,9 @@ struct ArchiveDetailView: View {
                     .buttonStyle(FieldSecondaryButtonStyle(destructive: true))
                     .accessibilityHint("Removes this copy from the phone. Today is left alone.")
             }
-            .padding(20)
+            .padding(palette.pagePadding)
         }
+        .fieldScroll()
         .navigationTitle("Saved day")
         .background(palette.background.ignoresSafeArea())
         .confirmationDialog("Delete this saved day?", isPresented: $confirmDelete, titleVisibility: .visible) {

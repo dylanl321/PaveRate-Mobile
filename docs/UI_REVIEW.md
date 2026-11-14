@@ -8,7 +8,7 @@ This pass did not add features, change the math, or touch signing. iOS and watch
 
 **Lock Screen white on white.** Commit `7133787` fixed the reported bug. Before it, the Live Activity tinted the system card white and left the big numbers on the default label color, which is white. The card is now an opaque near-black board (`BoardInk`): yellow feet, white tons and job name, and bright go / watch / hold colors. Dynamic Island text is the same ink on the system black island, which already had contrast. This pass keeps that board and fills the whole Live Activity card with `containerBackground`, because on iOS 17 a plain `.background` does not always paint the full Lock Screen card.
 
-**Map "End at" keypad.** The decimal pad has no return key. Done lived on `fieldKeyboardDone()`, and the map screen never called it. The field also sits in the bottom sheet, so the keypad covered the number and the Set end button. Every numeric field is a `BigNumberField`. After this pass, each screen that contains one calls `fieldKeyboardDone()`, and dragging the scroll view also dismisses the keypad.
+**Map "End at" keypad.** The decimal pad has no return key. There is one Done button. It writes the number back into the field, and on the map it places the end. Dragging the scroll view, or a tap outside the field, closes the keypad without placing the end. While End at is focused the map shrinks so the field stays above the keypad.
 
 | Screen | Fields | Dismiss |
 | --- | --- | --- |
@@ -72,35 +72,33 @@ This pass did not add features, change the math, or touch signing. iOS and watch
 - **Problem:** `7133787` painted the accessory widget yellow. Accessory widgets sit on the wallpaper, not on the dark board, so yellow repeats the white-on-white failure. The watch glance used the system color, so Go and Hold did not read as a status, and "Open iPhone" does not fit a circular complication.
 - **Fix:** Lock Screen accessory text uses the system primary color and the widget accent. The Home Screen widget and the Live Activity stay on the dark board. The watch app is a black board with the same go / watch / hold colors as the phone, and the type can shrink instead of clipping. The circular complication says "Open" when nothing has been sent, and still speaks "Open iPhone" to VoiceOver. Complication colors are left to the watch face so a light face does not get forced white type.
 
-### Calculator bar at large type
+### Calculator actions
 
 - **Screen:** Spread rate, feet left, and the other calculators.
-- **Problem:** Undo, Share, and Clear were forced to title size, so at accessibility sizes they collided in the bar.
-- **Fix:** They use the bar's own type. They stay in the bar so Share and Clear remain one tap. Their hit target is the system 44 points, which is the minimum, not a glove-sized row.
+- **Problem:** Undo, Share, and Clear sat in the navigation bar. At large type they collided, and the bar's hit target stays 44 points.
+- **Fix:** Those actions are full-width buttons under the result. Field mode draws them at the glove height. Compact mode draws them at 44 points. One place, no second copy in the bar.
 
-## P2 — polish, and what was left
+## Layout density
 
-Fixed while already in the file:
+Settings, and the first launch of this build, ask for **Field** or **Compact**. The choice is stored with `@AppStorage` (`paverate.layoutDensity`) and applied in `FieldPalette.palette(for:density:)`. Every screen reads button height, page padding, stack spacing, corner radius, type size, keypad height, slider row, and map-tag size from that palette. There is no per-screen branch. Field is the default. Compact uses the same Sunlight, Glare, and Night colors, including the status ink. Glare in Compact keeps the heavy border and the black type, with standard control heights.
 
-- Copy says "Copied" for two seconds, then returns to "Copy text".
-- Clear line and Delete saved day use the red outline, and they still ask first.
-- Snap tons uses the same primary button as the other actions, and Undo can put the tons back.
-- Empty "show your work" formulas wrap instead of clipping.
-- Map progress and the end slider announce feet to VoiceOver. The crosshair is hidden from VoiceOver. Drop point is the control.
-- The end field follows the slider until you tap into it, so it is not a blank box next to a length you already set.
+## P2
 
-Left alone:
-
-- Today is a long scroll: weather, the run, loads, photos, then share. Each block is a real step in the shift. Collapsing it would hide the work.
-- The job strip repeats on Today and on every calculator. It is the width, lift, and rate reminder, so it stays.
-- The end slider's thumb is still the system thumb. The number field is the control that meets the glove size.
-- Share, Clear, and Undo stay in the navigation bar. A second copy at the bottom would be clutter.
-- There is no coach-mark tour. The empty states already say what to do next: draw the run on Map, add a load, pull weather, or type the air temperature on Job.
-- The widget and Live Activity do not follow Sunlight, Glare, or Night. They stay on the dark board so a light Lock Screen cannot turn the type white on white again.
-- Glare sets muted type to black on purpose. Secondary lines do not look lighter than the rest, which is the full-sun rule.
-- Station tags on the map stay caption size. Larger tags would cover the road.
-- Appearance has two doors: the Today shortcut for glare, and the Job control for Sunlight, Glare, and Night. The shortcut is one tap in the sun.
+- Copy returns to "Copy text" after two seconds.
+- Clear line and Delete saved day use the red outline and still ask first.
+- Snap tons uses the primary button, and Undo can put the tons back.
+- Show-your-work formulas wrap.
+- Map progress and the end slider announce feet. The crosshair is hidden from VoiceOver. Drop point is the control.
+- The end field follows the slider until you type in it. Done commits that number and places the end.
+- Today stays one scroll, because each block is a step in the shift. Compact spacing fits more of it on the screen. The job strip stays, and it uses the same padding token so Compact makes it shorter.
+- The end slider row uses the layout height. Field gives it a taller hit area. Compact keeps 44 points.
+- Share, Clear, and Undo are the content buttons above, not a second row in the bar.
+- First launch is the density choice, not a coach-mark tour. Empty states still say the next step: draw the run, add a load, pull weather, or type the air temperature.
+- The widget and Live Activity stay on the dark board in both modes so a light Lock Screen cannot turn the type white on white.
+- Glare keeps black secondary type. That is the full-sun rule, in Field and in Compact.
+- Map station tags use the layout's tag size, larger in Field and smaller in Compact so they do not cover the road.
+- Sunlight, Glare, and Night stay on the Job tab, with the Today glare shortcut. Density is the separate control.
 
 ## What changed
 
-Theme ink, the shared field controls, and the screens listed above. The Lock Screen Live Activity keeps the dark board from `7133787` and now paints that board with `containerBackground`. No formula, stored model, or signing setting changed.
+Theme ink, the shared field controls, the density token, and the screens listed above. The Lock Screen keeps the dark board from `7133787`. One keypad Done button commits the number and, on the map, places the end. Build number is 6. No formula or signing setting changed.

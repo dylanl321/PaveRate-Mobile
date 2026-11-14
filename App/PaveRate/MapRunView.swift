@@ -14,7 +14,7 @@ struct MapRunView: View {
     @State private var confirmClear = false
     @State private var road = RoadSession()
     @State private var lengthText = ""
-    @FocusState private var endFocused: Bool
+    @State private var endFocused = false
 
     var body: some View {
         @Bindable var model = model
@@ -127,7 +127,7 @@ struct MapRunView: View {
                 ForEach(road.mileposts) { marker in
                     Annotation(marker.label, coordinate: CLLocationCoordinate2D(latitude: marker.point.latitude, longitude: marker.point.longitude)) {
                         Text(marker.label)
-                            .font(.caption.weight(.bold))
+                            .font(.system(size: palette.tagPoints, weight: .bold))
                             .foregroundStyle(.white)
                             .padding(.horizontal, 6)
                             .padding(.vertical, 3)
@@ -138,7 +138,7 @@ struct MapRunView: View {
                 ForEach(road.markers) { marker in
                     Annotation(marker.label, coordinate: CLLocationCoordinate2D(latitude: marker.point.latitude, longitude: marker.point.longitude)) {
                         Text(marker.label)
-                            .font(.caption.weight(.bold))
+                            .font(.system(size: palette.tagPoints, weight: .bold))
                             .foregroundStyle(.black)
                             .padding(.horizontal, 6)
                             .padding(.vertical, 3)
@@ -174,6 +174,7 @@ struct MapRunView: View {
                 MapCompass()
             }
             .onTapGesture { screen in
+                FieldKeyboard.dismiss()
                 guard let coord = proxy.convert(screen, from: .local) else { return }
                 let point = GeoPoint(latitude: coord.latitude, longitude: coord.longitude)
                 if road.phase == .manual {
@@ -202,7 +203,7 @@ struct MapRunView: View {
         @Bindable var model = model
         @Bindable var road = road
         let run = model.runMeasure
-        return VStack(alignment: .leading, spacing: 8) {
+        return VStack(alignment: .leading, spacing: palette.tightSpacing) {
             if !endFocused {
                 Text(run.lengthForCalcs > 0 ? model.settings.lengthHeadline(feet: run.lengthForCalcs) : "—")
                     .outdoorFont(48)
@@ -223,7 +224,7 @@ struct MapRunView: View {
                 }
             }
             ScrollView {
-                VStack(spacing: 10) {
+                VStack(spacing: palette.tightSpacing) {
                     roadControls
                     if !endFocused {
                         FieldSegmented(
@@ -253,7 +254,7 @@ struct MapRunView: View {
                         .disabled(run.lengthForCalcs <= 0)
                         .accessibilityHint("Fills length on spread rate, feet left, tonnage, and tack.")
 
-                        HStack(spacing: 10) {
+                        HStack(spacing: palette.tightSpacing) {
                             Button("Undo point") {
                                 model.undoPoint()
                                 FieldHaptics.tap()
@@ -284,15 +285,15 @@ struct MapRunView: View {
             .fieldScroll()
             .frame(maxHeight: endFocused ? .infinity : 320)
         }
-        .padding(.horizontal, 16)
-        .padding(.top, 12)
-        .padding(.bottom, 8)
+        .padding(.horizontal, palette.pagePadding)
+        .padding(.top, palette.tightSpacing)
+        .padding(.bottom, palette.tightSpacing)
         .background(palette.background)
     }
 
     private var roadControls: some View {
         @Bindable var road = road
-        return VStack(alignment: .leading, spacing: 10) {
+        return VStack(alignment: .leading, spacing: palette.tightSpacing) {
             Text(road.message)
                 .font(.title3.weight(.bold))
                 .foregroundStyle(palette.text)
@@ -334,26 +335,25 @@ struct MapRunView: View {
                         .fixedSize(horizontal: false, vertical: true)
                         .modifier(Collapsed(on: endFocused))
                     Slider(value: $road.endFeet, in: 0...max(choice.lengthFeet, 1))
-                        .frame(minHeight: 44)
+                        .frame(minHeight: palette.sliderMin)
                         .accessibilityLabel("End along the road")
                         .accessibilityValue("\(FieldFormat.groupedRound(road.endFeet)) feet")
                         .modifier(Collapsed(on: endFocused))
                     BigNumberField(
                         label: "End at",
-                        hint: "Feet from the start, along the road. Done closes the keypad.",
+                        hint: "Feet from the start, along the road. Done saves it and closes the keypad.",
                         unit: "ft",
-                        focus: $endFocused,
-                        text: $lengthText
-                    )
+                        text: $lengthText,
+                        onFocusChange: { endFocused = $0 }
+                    ) {
+                        applyTypedEnd(maxFeet: choice.lengthFeet)
+                    }
                     Button("Set end at this length") {
-                        if let feet = parseField(lengthText) {
-                            endFocused = false
-                            road.endFeet = min(max(0, feet), choice.lengthFeet)
-                            FieldHaptics.tap()
-                        }
+                        applyTypedEnd(maxFeet: choice.lengthFeet)
+                        FieldKeyboard.dismiss()
                     }
                     .buttonStyle(FieldPrimaryButtonStyle())
-                    VStack(spacing: 10) {
+                    VStack(spacing: palette.tightSpacing) {
                         ForEach(choice.forks) { fork in
                             Button("Turn \(fork.heading) onto \(fork.name)") {
                                 road.takeFork(fork)
@@ -383,6 +383,15 @@ struct MapRunView: View {
             }
             .modifier(Collapsed(on: endFocused))
         }
+    }
+
+    private func applyTypedEnd(maxFeet: Double) {
+        guard let feet = parseField(lengthText) else { return }
+        endFocused = false
+        road.endFeet = min(max(0, feet), maxFeet)
+        let shown = displayNumber(road.endFeet)
+        if lengthText != shown { lengthText = shown }
+        FieldHaptics.tap()
     }
 
     private func commitRoad() {
@@ -481,7 +490,7 @@ private struct RouteSearchSheet: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(alignment: .leading, spacing: 14) {
+                VStack(alignment: .leading, spacing: palette.stackSpacing) {
                     BigNumberField(
                         label: "Route",
                         hint: "Road name or route id.",
@@ -513,15 +522,15 @@ private struct RouteSearchSheet: View {
                             }
                             .foregroundStyle(palette.text)
                             .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding(16)
+                            .padding(palette.cardPadding)
                             .frame(minHeight: 88)
-                            .background(palette.surface, in: RoundedRectangle(cornerRadius: 14))
-                            .overlay(RoundedRectangle(cornerRadius: 14).stroke(palette.border, lineWidth: palette.borderWidth))
+                            .background(palette.surface, in: RoundedRectangle(cornerRadius: palette.cornerRadius))
+                            .overlay(RoundedRectangle(cornerRadius: palette.cornerRadius).stroke(palette.border, lineWidth: palette.borderWidth))
                         }
                         .buttonStyle(.plain)
                     }
                 }
-                .padding(20)
+                .padding(palette.pagePadding)
             }
             .fieldScroll()
             .navigationTitle("GDOT route")

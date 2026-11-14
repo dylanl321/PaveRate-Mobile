@@ -120,7 +120,7 @@ struct ShareBar: View {
     @State private var copied = false
 
     var body: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: palette.tightSpacing) {
             Button("Share") {
                 FieldHaptics.tap()
                 payload = SharePayload(items: SummaryExport.items(for: summary, images: images))
@@ -214,8 +214,8 @@ struct FieldPrimaryButtonStyle: ButtonStyle {
             .frame(maxWidth: .infinity)
             .frame(minHeight: palette.minControl)
             .foregroundStyle(palette.accentText)
-            .background(palette.accent, in: RoundedRectangle(cornerRadius: 14))
-            .overlay(RoundedRectangle(cornerRadius: 14).stroke(palette.border, lineWidth: palette.borderWidth))
+            .background(palette.accent, in: RoundedRectangle(cornerRadius: palette.cornerRadius))
+            .overlay(RoundedRectangle(cornerRadius: palette.cornerRadius).stroke(palette.border, lineWidth: palette.borderWidth))
             .opacity(!isEnabled ? 0.4 : (configuration.isPressed ? 0.72 : 1))
     }
 }
@@ -235,9 +235,9 @@ struct FieldSecondaryButtonStyle: ButtonStyle {
             .frame(maxWidth: .infinity)
             .frame(minHeight: palette.minControl)
             .foregroundStyle(destructive ? palette.bad : palette.text)
-            .background(palette.surface, in: RoundedRectangle(cornerRadius: 14))
+            .background(palette.surface, in: RoundedRectangle(cornerRadius: palette.cornerRadius))
             .overlay(
-                RoundedRectangle(cornerRadius: 14)
+                RoundedRectangle(cornerRadius: palette.cornerRadius)
                     .stroke(destructive ? palette.bad : palette.border, lineWidth: palette.borderWidth)
             )
             .opacity(!isEnabled ? 0.4 : (configuration.isPressed ? 0.72 : 1))
