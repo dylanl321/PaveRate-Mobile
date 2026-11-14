@@ -38,7 +38,7 @@ struct WeatherStrip: View {
                         .foregroundStyle(palette.text)
                 }
             } else {
-                Text(location.isAuthorized ? "No weather on this phone yet." : "Location fills the temperature and the rain. You can still type both on the Job tab.")
+                Text(location.isAuthorized ? "No weather on this phone yet." : "Location fills the temperature and the rain. You can still type both in job setup. Tap the job name on Today.")
                     .font(.title3.weight(.semibold))
                     .foregroundStyle(palette.text)
             }

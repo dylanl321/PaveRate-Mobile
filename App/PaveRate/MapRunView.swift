@@ -15,6 +15,8 @@ struct MapRunView: View {
     @State private var road = RoadSession()
     @State private var lengthText = ""
     @State private var endFocused = false
+    /// Drawing is its own mode so a stray tap while reading the map never moves the line.
+    @State private var editing = false
 
     var body: some View {
         @Bindable var model = model
@@ -176,6 +178,7 @@ struct MapRunView: View {
             }
             .onTapGesture { screen in
                 FieldKeyboard.dismiss()
+                guard editing else { return }
                 guard let coord = proxy.convert(screen, from: .local) else { return }
                 let point = GeoPoint(latitude: coord.latitude, longitude: coord.longitude)
                 if road.phase == .manual {
@@ -223,6 +226,37 @@ struct MapRunView: View {
                         .accessibilityLabel(run.overrun ? "Tracked line is past the plan" : "Plan progress")
                         .accessibilityValue("\(FieldFormat.groupedRound(run.remainingFeet)) feet left")
                 }
+            }
+            if !editing {
+                Button(run.lengthForCalcs > 0 ? "Change the line" : "Draw the run") {
+                    editing = true
+                    FieldHaptics.tap()
+                }
+                .buttonStyle(FieldPrimaryButtonStyle())
+                .accessibilityHint("Turns on drawing. Tap Done when the line is right.")
+                Button("Use this length in calculators") {
+                    model.applyRunLengthToJob()
+                    FieldHaptics.success()
+                }
+                .buttonStyle(FieldSecondaryButtonStyle())
+                .disabled(run.lengthForCalcs <= 0)
+                .accessibilityHint("Fills length on spread rate, feet left, tonnage, and tack.")
+            } else {
+            HStack(spacing: palette.tightSpacing) {
+                Text(model.drawMode == .plan ? "Editing the plan line" : "Editing the paved track")
+                    .font(.title3.weight(.bold))
+                    .foregroundStyle(palette.text)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                Button("Done") {
+                    editing = false
+                    tracking = false
+                    endFocused = false
+                    FieldKeyboard.dismiss()
+                    FieldHaptics.success()
+                }
+                .buttonStyle(FieldPrimaryButtonStyle())
+                .frame(maxWidth: 140)
+                .accessibilityHint("Stops drawing and keeps the line.")
             }
             ScrollView {
                 VStack(spacing: palette.tightSpacing) {
@@ -285,6 +319,7 @@ struct MapRunView: View {
             }
             .fieldScroll()
             .frame(maxHeight: endFocused ? .infinity : 320)
+            }
         }
         .padding(.horizontal, palette.pagePadding)
         .padding(.top, palette.tightSpacing)

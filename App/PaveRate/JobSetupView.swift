@@ -132,7 +132,7 @@ struct JobSetupView: View {
             .padding(palette.pagePadding)
         }
         .fieldScroll()
-        .navigationTitle("Job")
+        .navigationTitle("Job setup")
         .screenModeToolbar()
         .background(palette.background.ignoresSafeArea())
         .fieldKeyboardDone()
