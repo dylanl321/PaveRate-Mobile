@@ -17,6 +17,7 @@ struct PaveRateApp: App {
 
 struct RootView: View {
     @Environment(AppModel.self) private var model
+    @Environment(\.scenePhase) private var scenePhase
     @AppStorage(FieldDensity.storageKey) private var densityRaw = ""
 
     private var density: FieldDensity {
@@ -36,6 +37,11 @@ struct RootView: View {
         .preferredColorScheme(model.appearance == .night ? .dark : .light)
         .tint(palette.text)
         .installKeyboardDismiss()
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .background {
+                model.flushBoard()
+            }
+        }
     }
 
     private var tabs: some View {

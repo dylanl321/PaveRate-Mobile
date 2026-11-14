@@ -99,6 +99,7 @@ final class AppModel {
     private let legacyKey = "paverate.mobile.v1"
     private var isLoading = false
     private var weatherRequestInFlight = false
+    private var boardTask: Task<Void, Never>?
 
     init(job: JobSetup, appearance: FieldAppearance, inputs: ToolInputs, defaults: UserDefaults = .standard) {
         self.job = job
@@ -561,6 +562,14 @@ final class AppModel {
         )
     }
 
+    /// Push the Lock Screen now. Used when the app goes to the background, so a debounced update is not lost.
+    func flushBoard() {
+        boardTask?.cancel()
+        boardTask = nil
+        guard !isLoading else { return }
+        FieldBoardPublisher.publish(currentBoard(), console: consoleOn)
+    }
+
     private func persist() {
         guard !isLoading else { return }
         let snapshot = PersistedV3(
@@ -584,7 +593,14 @@ final class AppModel {
         )
         guard let data = try? JSONEncoder().encode(snapshot) else { return }
         defaults.set(data, forKey: storageKey)
-        FieldBoardPublisher.publish(currentBoard(), console: consoleOn)
+        let board = currentBoard()
+        let console = consoleOn
+        boardTask?.cancel()
+        boardTask = Task { @MainActor in
+            try? await Task.sleep(nanoseconds: 200_000_000)
+            guard !Task.isCancelled else { return }
+            FieldBoardPublisher.publish(board, console: console)
+        }
     }
 }
 

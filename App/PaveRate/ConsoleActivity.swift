@@ -17,10 +17,12 @@ enum FieldBoardPublisher {
 
 enum ConsoleActivity {
     private static var suppressed = false
+    private static var requesting = false
 
     static func sync(_ board: FieldBoard, enabled: Bool) {
         if !enabled {
             suppressed = false
+            requesting = false
             endAll()
             return
         }
@@ -33,14 +35,17 @@ enum ConsoleActivity {
         let content = ActivityContent(state: state, staleDate: nil)
         let existing = Activity<PaveActivityAttributes>.activities
         if existing.isEmpty {
-            guard !suppressed else { return }
+            guard !suppressed, !requesting else { return }
+            requesting = true
             do {
                 _ = try Activity.request(
                     attributes: PaveActivityAttributes(jobName: board.jobName),
                     content: content,
                     pushType: nil
                 )
+                requesting = false
             } catch {
+                requesting = false
                 suppressed = true
             }
             return
