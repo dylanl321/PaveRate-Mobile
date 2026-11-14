@@ -117,7 +117,7 @@ public enum FieldBoardStore {
     }
 }
 
-#if canImport(ActivityKit)
+#if canImport(ActivityKit) && os(iOS)
 import ActivityKit
 
 /// Shared by the app and the widget extension. Linux tests skip this block.
