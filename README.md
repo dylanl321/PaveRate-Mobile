@@ -28,7 +28,7 @@ Each screen shows one large result and an expandable **Show your work** breakdow
 
 **Milling** is length × width × depth: square yards, tons removed, and truckloads. Density defaults to 2 tons per cubic yard and stays on the phone with the other inputs.
 
-**Watch** (`com.paverate.ios.watchkitapp`) shows go, hold, feet left, and tons left. The phone sends that board over Watch Connectivity. The watch does not use an App Group.
+**Watch** (`com.paverate.ios.watchkitapp`) shows go, hold, feet left, and tons left. The phone sends that board over Watch Connectivity. The glance complication is `com.paverate.ios.watchkitapp.paveglance`. The watch does not use an App Group.
 
 **Loads** keep a running tonnage and, when you enter the feet a load covered, a Table 12 yield. Feet Left uses that total while the list has tickets.
 
