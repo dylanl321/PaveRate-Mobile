@@ -25,6 +25,7 @@ struct MapRunView: View {
             sheet
         }
         .navigationTitle("Map")
+        .screenModeToolbar()
         .navigationBarTitleDisplayMode(.inline)
         .background(palette.background.ignoresSafeArea())
         .fieldKeyboardDone()

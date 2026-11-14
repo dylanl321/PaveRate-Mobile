@@ -96,7 +96,7 @@ struct SettingsView: View {
 
                 FieldToggle(
                     title: "Glare by default",
-                    detail: "On switches to Glare now. Off leaves this screen as it is. Sunlight and Night are on the Job tab.",
+                    detail: "On switches to Glare now. Off leaves this screen as it is. The sun button at the top of every tab switches Sunlight, Glare, and Night.",
                     isOn: $model.settings.preferGlare
                 )
                 .onChange(of: model.settings.preferGlare) { _, on in

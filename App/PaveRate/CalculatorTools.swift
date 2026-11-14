@@ -13,7 +13,16 @@ struct SpreadRateTool: View {
             customTargetLbsSy: model.inputs.spreadOverride ? parseField(model.inputs.spreadCustomRate) : nil,
             job: model.job
         )
-        VStack(alignment: .leading, spacing: palette.stackSpacing) {
+        PinnedResultStack {
+            ResultHero(
+                value: report.headline,
+                unit: "lbs/SY placed",
+                secondary: varianceLine(report),
+                status: report.spec?.status.kind,
+                statusText: report.spec?.label,
+                compact: true
+            )
+        } content: {
             if let rain = report.rain, rain.status != .pass {
                 StatusBanner(kind: rain.status.kind, message: rain.message, detail: rain.guidance)
             }
@@ -56,13 +65,6 @@ struct SpreadRateTool: View {
             BigNumberField(label: "Distance covered", unit: "ft", text: $model.inputs.spreadDistance)
             UseRunLengthButton { model.inputs.spreadDistance = $0 }
 
-            ResultHero(
-                value: report.headline,
-                unit: "lbs/SY placed",
-                secondary: varianceLine(report),
-                status: report.spec?.status.kind,
-                statusText: report.spec?.label
-            )
 
             if let guidance = report.spec?.guidance {
                 Text(guidance)
@@ -127,7 +129,14 @@ struct FeetLeftTool: View {
                 rateLbsSy: report.rateLbsSy
             )
             : nil
-        VStack(alignment: .leading, spacing: palette.stackSpacing) {
+        PinnedResultStack {
+            ResultHero(
+                value: report.headline,
+                unit: "ft left today",
+                secondary: "At \(displayNumber(model.job.widthFt)) ft wide, \(FieldFormat.groupedRound(report.rateLbsSy)) lbs/SY",
+                compact: true
+            )
+        } content: {
             BigNumberField(label: "Tons ordered today", hint: "Plant tickets for the day.", unit: "tons", text: $model.inputs.feetOrdered)
             if model.loads.isEmpty {
                 BigNumberField(label: "Tons placed so far", unit: "tons", text: $model.inputs.feetPlaced)
@@ -138,11 +147,6 @@ struct FeetLeftTool: View {
             }
             BigNumberField(label: "Total length", hint: "Optional. Draws a progress bar.", unit: "ft", text: $model.inputs.feetTotalLength)
             UseRunLengthButton { model.inputs.feetTotalLength = $0 }
-            ResultHero(
-                value: report.headline,
-                unit: "ft left today",
-                secondary: "At \(displayNumber(model.job.widthFt)) ft wide, \(FieldFormat.groupedRound(report.rateLbsSy)) lbs/SY"
-            )
             if let oneTruckFeet {
                 Text("One \(displayNumber(model.job.truckLoadTons))-ton truck reaches \(FieldFormat.groupedRound(oneTruckFeet)) ft at this rate.")
                     .font(.title3.weight(.semibold))
@@ -177,14 +181,16 @@ struct DistancePlannerTool: View {
             desiredDistanceFt: parseField(model.inputs.plannerDesired),
             job: model.job
         )
-        VStack(alignment: .leading, spacing: palette.stackSpacing) {
-            BigNumberField(label: "Tons in plant silo", unit: "tons", text: $model.inputs.plannerSilo)
-            BigNumberField(label: "Tons in trucks headed to the job", unit: "tons", text: $model.inputs.plannerTrucks)
+        PinnedResultStack {
             ResultHero(
                 value: report.availableFeet.map(FieldFormat.groupedRound),
                 unit: "ft available",
-                secondary: report.availableTons.map { "From \(FieldFormat.groupedRound($0)) tons total" }
+                secondary: report.availableTons.map { "From \(FieldFormat.groupedRound($0)) tons total" },
+                compact: true
             )
+        } content: {
+            BigNumberField(label: "Tons in plant silo", unit: "tons", text: $model.inputs.plannerSilo)
+            BigNumberField(label: "Tons in trucks headed to the job", unit: "tons", text: $model.inputs.plannerTrucks)
             BigNumberField(label: "Desired distance to cover", unit: "ft", text: $model.inputs.plannerDesired)
             ResultHero(
                 value: report.tonsNeeded.map { FieldFormat.fixed($0, digits: 1) },
@@ -207,14 +213,16 @@ struct TonnageTool: View {
     var body: some View {
         @Bindable var model = model
         let report = AsphaltCalculator.tonnage(lengthFt: parseField(model.inputs.tonnageLength), job: model.job)
-        VStack(alignment: .leading, spacing: palette.stackSpacing) {
-            BigNumberField(label: "Length to pave", unit: "ft", text: $model.inputs.tonnageLength)
-            UseRunLengthButton { model.inputs.tonnageLength = $0 }
+        PinnedResultStack {
             ResultHero(
                 value: report.tons.map { FieldFormat.fixed($0, digits: 1) },
                 unit: "tons to order",
-                secondary: "Includes \(displayNumber(model.job.wastePct))% waste at \(FieldFormat.groupedRound(report.rateLbsSy)) lbs/SY"
+                secondary: "Includes \(displayNumber(model.job.wastePct))% waste at \(FieldFormat.groupedRound(report.rateLbsSy)) lbs/SY",
+                compact: true
             )
+        } content: {
+            BigNumberField(label: "Length to pave", unit: "ft", text: $model.inputs.tonnageLength)
+            UseRunLengthButton { model.inputs.tonnageLength = $0 }
             ShowWorkBox(
                 steps: report.steps,
                 notes: report.notes,
@@ -231,7 +239,16 @@ struct TackTool: View {
     var body: some View {
         @Bindable var model = model
         let report = AsphaltCalculator.tack(lengthFt: parseField(model.inputs.tackLength), job: model.job)
-        VStack(alignment: .leading, spacing: palette.stackSpacing) {
+        PinnedResultStack {
+            ResultHero(
+                value: report.suggestedGallons,
+                unit: report.blocked ? "gal blocked" : "gal at the mid rate",
+                secondary: rangeLine(report),
+                status: report.blocked ? .bad : nil,
+                statusText: report.blocked ? "Do not shoot" : nil,
+                compact: true
+            )
+        } content: {
             BigNumberField(label: "Length to shoot", unit: "ft", text: $model.inputs.tackLength)
             UseRunLengthButton { model.inputs.tackLength = $0 }
             SectionLabel(text: "Application")
@@ -255,13 +272,6 @@ struct TackTool: View {
             if model.job.surfaceWet {
                 StatusBanner(kind: .bad, message: "Surface is wet — do not tack.")
             }
-            ResultHero(
-                value: report.suggestedGallons,
-                unit: report.blocked ? "gal blocked" : "gal at the mid rate",
-                secondary: rangeLine(report),
-                status: report.blocked ? .bad : nil,
-                statusText: report.blocked ? "Do not shoot" : nil
-            )
             ShowWorkBox(
                 steps: report.steps,
                 notes: report.notes,
@@ -283,14 +293,15 @@ struct StickCheckTool: View {
     var body: some View {
         @Bindable var model = model
         let report = AsphaltCalculator.stick(compactedIn: parseField(model.inputs.stickTarget))
-        VStack(alignment: .leading, spacing: palette.stackSpacing) {
+        PinnedResultStack {
+            ResultHero(value: report.headline, unit: "in loose behind the screed", compact: true)
+        } content: {
             BigNumberField(
                 label: "Target compacted thickness",
                 hint: "What the mat should be after the rollers.",
                 unit: "in",
                 text: $model.inputs.stickTarget
             )
-            ResultHero(value: report.headline, unit: "in loose behind the screed")
             ShowWorkBox(
                 steps: report.steps,
                 notes: report.notes,
@@ -306,20 +317,22 @@ struct PavingWindowTool: View {
 
     var body: some View {
         let report = AsphaltCalculator.pavingWindow(job: model.job)
-        VStack(alignment: .leading, spacing: palette.stackSpacing) {
+        PinnedResultStack {
+            ResultHero(
+                value: report.headline,
+                unit: "minimum air temp for this lift",
+                secondary: model.job.airTempF.map { "Air is \(displayNumber($0))°F" },
+                status: report.check?.status.kind,
+                statusText: badge(report),
+                compact: true
+            )
+        } content: {
             WeatherStrip()
             if model.job.airTempF == nil {
                 Text("Enter the air temperature on the Job tab to check this lift.")
                     .font(.title3)
                     .foregroundStyle(palette.text)
             }
-            ResultHero(
-                value: report.headline,
-                unit: "minimum air temp for this lift",
-                secondary: model.job.airTempF.map { "Air is \(displayNumber($0))°F" },
-                status: report.check?.status.kind,
-                statusText: badge(report)
-            )
             if let check = report.check {
                 StatusBanner(kind: check.status.kind, message: check.message, detail: check.guidance)
             }
@@ -374,7 +387,16 @@ struct MillingTool: View {
             densityTonsPerCubicYard: parseField(densityText) ?? 0,
             truckTons: model.job.truckLoadTons
         )
-        VStack(alignment: .leading, spacing: palette.stackSpacing) {
+        PinnedResultStack {
+            ResultHero(
+                value: result.map { FieldFormat.fixed($0.tons, digits: 1) },
+                unit: "tons removed",
+                secondary: result.map {
+                    "\(FieldFormat.groupedRound($0.squareYards)) SY · \(FieldFormat.fixed($0.truckloads, digits: 1)) loads · one truck covers \(FieldFormat.groupedRound($0.feetPerTruck)) ft"
+                },
+                compact: true
+            )
+        } content: {
             Text("Width and truck size come from the job. Density is a field estimate, about 2 tons per cubic yard for asphalt millings.")
                 .font(.body.weight(.semibold))
                 .foregroundStyle(palette.text)
@@ -382,13 +404,6 @@ struct MillingTool: View {
             UseRunLengthButton { lengthText = $0 }
             BigNumberField(label: "Depth", unit: "in", text: $depthText)
             BigNumberField(label: "Density", hint: "Tons per cubic yard. About 2 for asphalt millings.", unit: "tons/CY", text: $densityText)
-            ResultHero(
-                value: result.map { FieldFormat.fixed($0.tons, digits: 1) },
-                unit: "tons removed",
-                secondary: result.map {
-                    "\(FieldFormat.groupedRound($0.squareYards)) SY · \(FieldFormat.fixed($0.truckloads, digits: 1)) loads · one truck covers \(FieldFormat.groupedRound($0.feetPerTruck)) ft"
-                }
-            )
         }
     }
 }
