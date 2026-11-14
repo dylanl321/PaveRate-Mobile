@@ -71,6 +71,7 @@ public enum FieldTool: String, CaseIterable, Codable, Sendable, Identifiable {
     case tonnage
     case tack
     case stickCheck
+    case milling
     case pavingWindow
 
     public var id: String { rawValue }
@@ -83,6 +84,7 @@ public enum FieldTool: String, CaseIterable, Codable, Sendable, Identifiable {
         case .tonnage: return "Tonnage to Order"
         case .tack: return "Tack Rate"
         case .stickCheck: return "Stick Check"
+        case .milling: return "Milling"
         case .pavingWindow: return "Paving Window"
         }
     }
@@ -95,6 +97,7 @@ public enum FieldTool: String, CaseIterable, Codable, Sendable, Identifiable {
         case .tonnage: return "Tons to order for a length"
         case .tack: return "Gallons of tack to shoot"
         case .stickCheck: return "Loose height behind the screed"
+        case .milling: return "Tons and trucks to mill a depth"
         case .pavingWindow: return "Table 4 minimum air temperature"
         }
     }

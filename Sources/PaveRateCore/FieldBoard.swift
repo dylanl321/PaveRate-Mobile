@@ -37,6 +37,15 @@ public struct FieldBoard: Codable, Equatable, Sendable {
         return "\(FieldFormat.groupedRound(feetLeft)) ft left"
     }
 
+    public var callWord: String {
+        switch status {
+        case "pass": return "Go"
+        case "warn": return "Watch"
+        case "fail": return "Hold"
+        default: return "Open iPhone"
+        }
+    }
+
     public var tonsText: String {
         if let tonsRemaining {
             return "\(FieldFormat.fixed(max(tonsRemaining, 0), digits: 1)) tons left"
@@ -76,6 +85,17 @@ public struct FieldBoard: Codable, Equatable, Sendable {
         status: "none",
         updatedAt: Date(timeIntervalSince1970: 0)
     )
+}
+
+public enum FieldBoardCoding {
+    public static func data(from board: FieldBoard) -> Data? {
+        try? JSONEncoder().encode(board)
+    }
+
+    public static func board(from data: Data?) -> FieldBoard? {
+        guard let data else { return nil }
+        return try? JSONDecoder().decode(FieldBoard.self, from: data)
+    }
 }
 
 public enum FieldBoardStore {

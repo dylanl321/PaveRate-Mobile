@@ -139,6 +139,16 @@ extension AppModel {
             if let loose = report.headline {
                 details.append("Loose height: \(loose) in")
             }
+        case .milling:
+            if let result = MillingCalculator.calculate(
+                lengthFt: parseField(UserDefaults.standard.string(forKey: "paverate.mill.length") ?? "") ?? 0,
+                widthFt: job.widthFt,
+                depthIn: parseField(UserDefaults.standard.string(forKey: "paverate.mill.depth") ?? "") ?? 0,
+                densityTonsPerCubicYard: parseField(UserDefaults.standard.string(forKey: "paverate.mill.density") ?? "") ?? 0,
+                truckTons: job.truckLoadTons
+            ) {
+                details.append("Milling: \(FieldFormat.fixed(result.tons, digits: 1)) tons · \(FieldFormat.fixed(result.truckloads, digits: 1)) loads")
+            }
         case .pavingWindow:
             if let decision = weatherDecision {
                 details.append(decision.headline)

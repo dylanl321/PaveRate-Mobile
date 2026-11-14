@@ -237,6 +237,10 @@ final class AppModel {
             inputs.tackLength = ""
         case .stickCheck:
             inputs.stickTarget = "1.5"
+        case .milling:
+            UserDefaults.standard.set("", forKey: "paverate.mill.length")
+            UserDefaults.standard.set("2", forKey: "paverate.mill.depth")
+            UserDefaults.standard.set("2", forKey: "paverate.mill.density")
         case .pavingWindow:
             break
         }

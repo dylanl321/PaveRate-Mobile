@@ -11,6 +11,7 @@ enum FieldBoardPublisher {
         FieldBoardStore.write(board, defaults: .standard)
         WidgetCenter.shared.reloadAllTimelines()
         ConsoleActivity.sync(board, enabled: console)
+        WatchBridge.shared.send(board)
     }
 }
 

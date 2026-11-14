@@ -8,8 +8,11 @@ struct BigNumberField: View {
     let unit: String
     var numeric: Bool = true
     @Binding var text: String
+    /// Runs when Done commits the field. The map uses this to place the end.
+    var onSubmit: (() -> Void)? = nil
 
     @Environment(\.fieldPalette) private var palette
+    @FocusState private var focused: Bool
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -20,10 +23,32 @@ struct BigNumberField: View {
                 TextField(numeric ? "0" : "Name", text: $text)
                     .keyboardType(numeric ? .decimalPad : .default)
                     .textInputAutocapitalization(numeric ? .never : .words)
+                    .focused($focused)
+                    .submitLabel(.done)
+                    .onSubmit {
+                        commitValue()
+                        focused = false
+                    }
                     .font(.system(size: palette.fieldPoints, weight: .bold, design: .rounded))
                     .foregroundStyle(palette.text)
                     .minimumScaleFactor(0.6)
                     .accessibilityLabel(label)
+                    .onChange(of: focused) { _, isOn in
+                        if isOn {
+                            let binding = $text
+                            let submit = onSubmit
+                            let isNumeric = numeric
+                            FieldKeyboard.submit = {
+                                if isNumeric, let value = parseField(binding.wrappedValue) {
+                                    let shown = displayNumber(value)
+                                    if binding.wrappedValue != shown {
+                                        binding.wrappedValue = shown
+                                    }
+                                }
+                                submit?()
+                            }
+                        }
+                    }
                 if !unit.isEmpty {
                     Text(unit)
                         .font(.title2.weight(.semibold))
@@ -42,6 +67,95 @@ struct BigNumberField: View {
                     .font(.body)
                     .foregroundStyle(palette.muted)
             }
+        }
+    }
+
+    /// Writes a clean number back into the field, then runs the screen's submit.
+    private func commitValue() {
+        if numeric, let value = parseField(text) {
+            let shown = displayNumber(value)
+            if text != shown { text = shown }
+        }
+        onSubmit?()
+    }
+}
+
+/// One place for the keypad's Done button and for taps that should close it.
+@MainActor
+enum FieldKeyboard {
+    static var submit: (() -> Void)?
+
+    static func done() {
+        let action = submit
+        submit = nil
+        action?()
+        dismiss()
+    }
+
+    static func dismiss() {
+        submit = nil
+        UIApplication.shared.sendAction(
+            #selector(UIResponder.resignFirstResponder),
+            to: nil,
+            from: nil,
+            for: nil
+        )
+    }
+}
+
+/// Closes the keypad when the tap is not on the field itself. Buttons still receive the tap.
+private struct KeyboardDismissInstaller: UIViewRepresentable {
+    func makeUIView(context: Context) -> UIView {
+        let view = UIView(frame: .zero)
+        view.isUserInteractionEnabled = false
+        return view
+    }
+
+    func updateUIView(_ uiView: UIView, context: Context) {
+        DispatchQueue.main.async {
+            guard let window = uiView.window, context.coordinator.recognizer == nil else { return }
+            let tap = UITapGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.dismiss))
+            tap.cancelsTouchesInView = false
+            tap.delegate = context.coordinator
+            window.addGestureRecognizer(tap)
+            context.coordinator.recognizer = tap
+        }
+    }
+
+    static func dismantleUIView(_ uiView: UIView, coordinator: Coordinator) {
+        if let tap = coordinator.recognizer {
+            tap.view?.removeGestureRecognizer(tap)
+            coordinator.recognizer = nil
+        }
+    }
+
+    func makeCoordinator() -> Coordinator { Coordinator() }
+
+    final class Coordinator: NSObject, UIGestureRecognizerDelegate {
+        var recognizer: UITapGestureRecognizer?
+
+        @objc func dismiss() {
+            DispatchQueue.main.async {
+                FieldKeyboard.dismiss()
+            }
+        }
+
+        func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
+            var view: UIView? = touch.view
+            while let current = view {
+                if current is UITextField || current is UITextView || current is UIControl { return false }
+                let name = NSStringFromClass(type(of: current))
+                if name.contains("Keyboard") || name.contains("Input") { return false }
+                view = current.superview
+            }
+            return true
+        }
+
+        func gestureRecognizer(
+            _ gestureRecognizer: UIGestureRecognizer,
+            shouldRecognizeSimultaneouslyWith other: UIGestureRecognizer
+        ) -> Bool {
+            true
         }
     }
 }
@@ -272,21 +386,34 @@ struct JobStrip: View {
 }
 
 extension View {
+    /// Number pads have no return key. This bar is the way off them.
     func fieldKeyboardDone() -> some View {
         toolbar {
             ToolbarItemGroup(placement: .keyboard) {
                 Spacer()
                 Button("Done") {
-                    UIApplication.shared.sendAction(
-                        #selector(UIResponder.resignFirstResponder),
-                        to: nil,
-                        from: nil,
-                        for: nil
-                    )
+                    FieldKeyboard.done()
                 }
-                .font(.title3.weight(.bold))
+                .font(.title2.weight(.bold))
+                .padding(.horizontal, 28)
+                .padding(.vertical, 8)
+                .frame(minWidth: 132, minHeight: 52)
+                .foregroundStyle(FieldPalette.sunlight.accentText)
+                .background(FieldPalette.sunlight.accent, in: Capsule())
+                .accessibilityLabel("Done")
+                .accessibilityHint("Saves this number and closes the keypad.")
             }
         }
+    }
+
+    func fieldScroll() -> some View {
+        scrollDismissesKeyboard(.interactively)
+    }
+}
+
+extension View {
+    func installKeyboardDismiss() -> some View {
+        background(KeyboardDismissInstaller())
     }
 }
 

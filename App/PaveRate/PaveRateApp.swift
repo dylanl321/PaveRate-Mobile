@@ -10,6 +10,7 @@ struct PaveRateApp: App {
             RootView()
                 .environment(model)
                 .environment(location)
+                .task { WatchBridge.shared.start() }
         }
     }
 }
@@ -51,5 +52,6 @@ struct RootView: View {
         .environment(\.fieldPalette, palette)
         .preferredColorScheme(model.appearance == .night ? .dark : .light)
         .tint(palette.accentText)
+        .installKeyboardDismiss()
     }
 }

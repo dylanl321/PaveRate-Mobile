@@ -35,7 +35,10 @@ xcodebuild archive \
   -destination 'generic/platform=iOS' \
   -archivePath "$ARCHIVE" \
   -allowProvisioningUpdates ${auth[@]+"${auth[@]}"} \
-  DEVELOPMENT_TEAM="$TEAM_ID"
+  DEVELOPMENT_TEAM="$TEAM_ID" \
+  CODE_SIGN_STYLE=Automatic \
+  PROVISIONING_PROFILE_SPECIFIER="" \
+  PROVISIONING_PROFILE=""
 
 xcodebuild -exportArchive \
   -archivePath "$ARCHIVE" \

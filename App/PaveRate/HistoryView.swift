@@ -41,6 +41,7 @@ struct HistoryView: View {
             }
             .padding(20)
         }
+        .fieldScroll()
         .navigationTitle("Saved days")
         .background(palette.background.ignoresSafeArea())
     }
@@ -80,6 +81,7 @@ struct ArchiveDetailView: View {
             }
             .padding(20)
         }
+        .fieldScroll()
         .navigationTitle("Saved day")
         .background(palette.background.ignoresSafeArea())
         .confirmationDialog("Delete this saved day?", isPresented: $confirmDelete, titleVisibility: .visible) {
