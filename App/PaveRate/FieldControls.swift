@@ -81,7 +81,7 @@ struct BigNumberField: View {
 
     private func styled<V: View>(_ view: V) -> some View {
         view
-            .font(.system(size: fieldSize, weight: .bold, design: .rounded))
+            .font(palette.font(size: fieldSize, weight: .bold, base: fieldSize))
             .foregroundStyle(palette.text)
             .focused($focused)
             .submitLabel(.done)

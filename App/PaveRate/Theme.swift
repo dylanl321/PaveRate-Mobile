@@ -133,6 +133,8 @@ struct FieldPalette {
     let onBad: Color
     let borderWidth: CGFloat
     var layout: FieldLayout
+    /// Heavy rounded type for direct sun. Only Glare turns it on; the other modes use lighter weights.
+    var heavyType: Bool = false
 
     var heroPoints: CGFloat { layout.heroPoints }
     var fieldPoints: CGFloat { layout.fieldPoints }
@@ -148,22 +150,23 @@ struct FieldPalette {
     var tagPoints: CGFloat { layout.tagPoints }
     var fieldTypeCap: CGFloat { layout.fieldTypeCap }
 
+    /// Daylight: warm stone with charcoal text and hairline borders. Glare is the max-contrast mode.
     static let sunlight = FieldPalette(
-        background: Color(red: 1, green: 1, blue: 1),
-        surface: Color(red: 0.973, green: 0.973, blue: 0.973),
-        surfaceAlt: Color(red: 0.937, green: 0.937, blue: 0.937),
-        border: .black,
-        text: .black,
-        muted: Color(red: 0.2, green: 0.2, blue: 0.2),
-        accent: Color(red: 0.961, green: 0.659, blue: 0),
-        accentText: .black,
-        good: Color(red: 0, green: 0.478, blue: 0.184),
-        warn: Color(red: 0.60, green: 0.26, blue: 0),
-        bad: Color(red: 0.8, green: 0, blue: 0),
+        background: Color(red: 0.937, green: 0.929, blue: 0.910),
+        surface: Color(red: 0.980, green: 0.976, blue: 0.965),
+        surfaceAlt: Color(red: 0.953, green: 0.945, blue: 0.925),
+        border: Color(red: 0.871, green: 0.855, blue: 0.824),
+        text: Color(red: 0.141, green: 0.157, blue: 0.176),
+        muted: Color(red: 0.361, green: 0.388, blue: 0.420),
+        accent: Color(red: 0.878, green: 0.635, blue: 0.118),
+        accentText: Color(red: 0.165, green: 0.122, blue: 0.016),
+        good: Color(red: 0.118, green: 0.416, blue: 0.231),
+        warn: Color(red: 0.529, green: 0.318, blue: 0.043),
+        bad: Color(red: 0.659, green: 0.227, blue: 0.196),
         onGood: .white,
         onWarn: .white,
         onBad: .white,
-        borderWidth: 3,
+        borderWidth: 1,
         layout: .fieldSun
     )
 
@@ -183,21 +186,23 @@ struct FieldPalette {
         onWarn: .white,
         onBad: .white,
         borderWidth: 4,
-        layout: .fieldGlare
+        layout: .fieldGlare,
+        heavyType: true
     )
 
+    /// Dusk: soft slate with off-white text, not white on black.
     static let night = FieldPalette(
-        background: Color(red: 0.106, green: 0.133, blue: 0.157),
-        surface: Color(red: 0.137, green: 0.173, blue: 0.204),
-        surfaceAlt: Color(red: 0.180, green: 0.231, blue: 0.275),
-        border: Color(red: 0.216, green: 0.267, blue: 0.310),
-        text: Color(red: 0.957, green: 0.965, blue: 0.969),
-        muted: Color(red: 0.624, green: 0.690, blue: 0.741),
-        accent: Color(red: 0.949, green: 0.753, blue: 0.216),
-        accentText: Color(red: 0.106, green: 0.133, blue: 0.157),
-        good: Color(red: 0.247, green: 0.698, blue: 0.498),
-        warn: Color(red: 0.878, green: 0.573, blue: 0.184),
-        bad: Color(red: 0.847, green: 0.345, blue: 0.310),
+        background: Color(red: 0.110, green: 0.129, blue: 0.153),
+        surface: Color(red: 0.145, green: 0.169, blue: 0.196),
+        surfaceAlt: Color(red: 0.173, green: 0.200, blue: 0.231),
+        border: Color(red: 0.208, green: 0.239, blue: 0.275),
+        text: Color(red: 0.894, green: 0.906, blue: 0.918),
+        muted: Color(red: 0.604, green: 0.643, blue: 0.682),
+        accent: Color(red: 0.890, green: 0.675, blue: 0.227),
+        accentText: Color(red: 0.110, green: 0.086, blue: 0.024),
+        good: Color(red: 0.361, green: 0.769, blue: 0.541),
+        warn: Color(red: 0.910, green: 0.647, blue: 0.290),
+        bad: Color(red: 0.878, green: 0.408, blue: 0.373),
         onGood: .black,
         onWarn: .black,
         onBad: .black,
@@ -273,7 +278,29 @@ struct OutdoorFont: ViewModifier {
 
     func body(content: Content) -> some View {
         let size = base * palette.fontScale * OutdoorScale.multiplier(dynamicTypeSize)
-        content.font(.system(size: size, weight: weight, design: .rounded))
+        content.font(palette.font(size: size, weight: weight, base: base))
+    }
+}
+
+extension FieldPalette {
+    /// Glare keeps the requested weight in rounded type. The softer modes cap bold at
+    /// semibold for big numbers and titles, and use medium for everything smaller.
+    func font(size: CGFloat, weight: Font.Weight, base: CGFloat) -> Font {
+        if heavyType {
+            return .system(size: size, weight: weight, design: .rounded)
+        }
+        return .system(size: size, weight: softened(weight, base: base))
+    }
+
+    func softened(_ weight: Font.Weight, base: CGFloat) -> Font.Weight {
+        switch weight {
+        case .black, .heavy, .bold:
+            return base >= 28 ? .semibold : .medium
+        case .semibold:
+            return .medium
+        default:
+            return weight
+        }
     }
 }
 
