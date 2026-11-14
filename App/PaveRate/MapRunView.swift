@@ -23,6 +23,7 @@ struct MapRunView: View {
         }
         .navigationTitle("Map")
         .background(palette.background.ignoresSafeArea())
+        .fieldKeyboardDone()
         .onAppear {
             location.requestAndStart()
             centerOnExisting()
@@ -137,6 +138,7 @@ struct MapRunView: View {
                 MapCompass()
             }
             .onTapGesture { screen in
+                FieldKeyboard.dismiss()
                 guard let coord = proxy.convert(screen, from: .local) else { return }
                 let point = GeoPoint(latitude: coord.latitude, longitude: coord.longitude)
                 if road.phase == .manual {
@@ -232,6 +234,7 @@ struct MapRunView: View {
                         .buttonStyle(FieldSecondaryButtonStyle())
                 }
             }
+            .fieldScroll()
             .frame(maxHeight: 320)
         }
         .padding(.horizontal, 16)
@@ -282,12 +285,11 @@ struct MapRunView: View {
                         .foregroundStyle(palette.text)
                     Slider(value: $road.endFeet, in: 0...max(choice.lengthFeet, 1))
                         .accessibilityLabel("End along the road")
-                    BigNumberField(label: "End at", hint: "Feet from the start, along the road.", unit: "ft", text: $lengthText)
+                    BigNumberField(label: "End at", hint: "Feet from the start, along the road.", unit: "ft", text: $lengthText) {
+                        applyTypedEnd(maxFeet: choice.lengthFeet)
+                    }
                     Button("Set end at this length") {
-                        if let feet = parseField(lengthText) {
-                            road.endFeet = min(max(0, feet), choice.lengthFeet)
-                            FieldHaptics.tap()
-                        }
+                        applyTypedEnd(maxFeet: choice.lengthFeet)
                     }
                     .buttonStyle(FieldPrimaryButtonStyle())
                     ForEach(choice.forks) { fork in
@@ -314,6 +316,12 @@ struct MapRunView: View {
                 .buttonStyle(FieldSecondaryButtonStyle())
             }
         }
+    }
+
+    private func applyTypedEnd(maxFeet: Double) {
+        guard let feet = parseField(lengthText) else { return }
+        road.endFeet = min(max(0, feet), maxFeet)
+        FieldHaptics.tap()
     }
 
     private func commitRoad() {
@@ -427,6 +435,7 @@ private struct RouteSearchSheet: View {
                 }
                 .padding(20)
             }
+            .fieldScroll()
             .navigationTitle("GDOT route")
             .background(palette.background.ignoresSafeArea())
             .fieldKeyboardDone()

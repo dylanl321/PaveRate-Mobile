@@ -43,6 +43,7 @@ struct ToolListView: View {
             }
             .padding(20)
         }
+        .fieldScroll()
         .navigationTitle("PaveRate")
         .background(palette.background.ignoresSafeArea())
     }
@@ -80,6 +81,7 @@ struct CalculatorScreen: View {
             }
             .padding(20)
         }
+        .fieldScroll()
         .navigationTitle(tool.title)
         .background(palette.background.ignoresSafeArea())
         .fieldKeyboardDone()

@@ -134,6 +134,7 @@ struct WeatherStrip: View {
                 }
             }
         }
+        .fieldScroll()
     }
 
     private func pull() async {

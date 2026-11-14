@@ -109,6 +109,7 @@ struct SettingsView: View {
             }
             .padding(20)
         }
+        .fieldScroll()
         .navigationTitle("Settings")
         .background(palette.background.ignoresSafeArea())
         .fieldKeyboardDone()

@@ -166,6 +166,7 @@ struct JobSetupView: View {
             }
             .padding(20)
         }
+        .fieldScroll()
         .navigationTitle("Job")
         .background(palette.background.ignoresSafeArea())
         .fieldKeyboardDone()

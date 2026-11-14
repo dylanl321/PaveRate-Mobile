@@ -52,5 +52,6 @@ struct RootView: View {
         .environment(\.fieldPalette, palette)
         .preferredColorScheme(model.appearance == .night ? .dark : .light)
         .tint(palette.accentText)
+        .installKeyboardDismiss()
     }
 }

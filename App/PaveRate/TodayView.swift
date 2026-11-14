@@ -61,6 +61,8 @@ struct TodayView: View {
             .padding(20)
             .padding(.bottom, 12)
         }
+        .fieldScroll()
+        .fieldKeyboardDone()
         .navigationTitle("Today")
         .background(palette.background.ignoresSafeArea())
         .onAppear { noteText = model.dayNote }
@@ -300,6 +302,7 @@ struct AddLoadSheet: View {
                 }
                 .padding(20)
             }
+            .fieldScroll()
             .navigationTitle(existing == nil ? "Load" : "Edit load")
             .background(palette.background.ignoresSafeArea())
             .fieldKeyboardDone()
