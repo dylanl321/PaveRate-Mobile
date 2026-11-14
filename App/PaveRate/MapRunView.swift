@@ -14,18 +14,26 @@ struct MapRunView: View {
     @State private var confirmClear = false
     @State private var road = RoadSession()
     @State private var lengthText = ""
+    @FocusState private var endFocused: Bool
 
     var body: some View {
         @Bindable var model = model
         VStack(spacing: 0) {
             map
+                .frame(minHeight: endFocused ? 56 : 180)
+                .frame(maxHeight: endFocused ? 56 : .infinity)
             sheet
         }
         .navigationTitle("Map")
+        .navigationBarTitleDisplayMode(.inline)
         .background(palette.background.ignoresSafeArea())
+        .fieldKeyboardDone()
         .onAppear {
             location.requestAndStart()
             centerOnExisting()
+            if road.endFeet > 0, lengthText.isEmpty {
+                lengthText = displayNumber(road.endFeet)
+            }
         }
         .onChange(of: location.coordinate?.latitude) { _, _ in
             guard tracking, let point = location.coordinate else { return }
@@ -40,8 +48,16 @@ struct MapRunView: View {
                 location.requestAndStart()
             }
         }
-        .onChange(of: road.endFeet) { _, _ in commitRoad() }
+        .onChange(of: road.endFeet) { _, feet in
+            commitRoad()
+            guard !endFocused else { return }
+            let shown = feet > 0 ? displayNumber(feet) : ""
+            if lengthText != shown { lengthText = shown }
+        }
         .onChange(of: road.choice?.id) { _, _ in commitRoad() }
+        .onChange(of: road.phase) { _, phase in
+            if phase != .along { endFocused = false }
+        }
         .sheet(isPresented: $showRoutes) {
             RouteSearchSheet { route in
                 model.savedRoute = SavedRoute(
@@ -76,49 +92,67 @@ struct MapRunView: View {
                 UserAnnotation()
                 if let route = model.savedRoute {
                     ForEach(Array(route.lines.enumerated()), id: \.offset) { _, line in
-                        MapPolyline(coordinates: coordinates(line))
+                        let coords = coordinates(line)
+                        MapPolyline(coordinates: coords)
+                            .stroke(.black, lineWidth: 8)
+                        MapPolyline(coordinates: coords)
                             .stroke(.blue, lineWidth: 4)
                     }
                 }
                 if model.plannedPoints.count >= 2 {
-                    MapPolyline(coordinates: coordinates(model.plannedPoints))
-                        .stroke(palette.text, lineWidth: 6)
+                    let plan = coordinates(model.plannedPoints)
+                    MapPolyline(coordinates: plan)
+                        .stroke(.black, lineWidth: 10)
+                    MapPolyline(coordinates: plan)
+                        .stroke(.white, lineWidth: 6)
                     let run = model.runMeasure
                     if run.plannedFeet > 0, run.pavedFeet > 0 {
-                        MapPolyline(coordinates: coordinates(GeoMeasure.prefix(
+                        let paved = coordinates(GeoMeasure.prefix(
                             points: model.plannedPoints,
                             feet: min(run.pavedFeet, run.plannedFeet)
-                        )))
-                        .stroke(palette.good, lineWidth: 8)
+                        ))
+                        MapPolyline(coordinates: paved)
+                            .stroke(.black, lineWidth: 12)
+                        MapPolyline(coordinates: paved)
+                            .stroke(palette.good, lineWidth: 8)
                     }
                 }
                 if model.pavedPoints.count >= 2 {
-                    MapPolyline(coordinates: coordinates(model.pavedPoints))
+                    let paved = coordinates(model.pavedPoints)
+                    MapPolyline(coordinates: paved)
+                        .stroke(.black, lineWidth: 9)
+                    MapPolyline(coordinates: paved)
                         .stroke(palette.good, lineWidth: 5)
                 }
                 ForEach(road.mileposts) { marker in
                     Annotation(marker.label, coordinate: CLLocationCoordinate2D(latitude: marker.point.latitude, longitude: marker.point.longitude)) {
                         Text(marker.label)
-                            .font(.caption2.weight(.bold))
+                            .font(.caption.weight(.bold))
                             .foregroundStyle(.white)
-                            .padding(4)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 3)
                             .background(.blue, in: Capsule())
+                            .overlay(Capsule().stroke(.black, lineWidth: 1))
                     }
                 }
                 ForEach(road.markers) { marker in
                     Annotation(marker.label, coordinate: CLLocationCoordinate2D(latitude: marker.point.latitude, longitude: marker.point.longitude)) {
                         Text(marker.label)
                             .font(.caption.weight(.bold))
-                            .padding(4)
+                            .foregroundStyle(.black)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 3)
                             .background(.white, in: Capsule())
+                            .overlay(Capsule().stroke(.black, lineWidth: 1))
                     }
                 }
                 if road.phase == .along, let end = road.planned.last {
                     Annotation("End", coordinate: CLLocationCoordinate2D(latitude: end.latitude, longitude: end.longitude)) {
                         Circle()
                             .fill(palette.accent)
-                            .frame(width: 26, height: 26)
+                            .frame(width: 28, height: 28)
                             .overlay(Circle().stroke(.white, lineWidth: 3))
+                            .overlay(Circle().stroke(.black, lineWidth: 1))
                             .accessibilityLabel("End of the run")
                     }
                 }
@@ -126,12 +160,15 @@ struct MapRunView: View {
                     Annotation("Paved", coordinate: CLLocationCoordinate2D(latitude: head.latitude, longitude: head.longitude)) {
                         Circle()
                             .fill(palette.good)
-                            .frame(width: 22, height: 22)
+                            .frame(width: 24, height: 24)
                             .overlay(Circle().stroke(.white, lineWidth: 3))
+                            .overlay(Circle().stroke(.black, lineWidth: 1))
+                            .accessibilityLabel("Paved so far")
                     }
                 }
             }
             .mapStyle(.hybrid)
+            .tint(Color(red: 0.0, green: 0.35, blue: 0.75))
             .mapControls {
                 MapUserLocationButton()
                 MapCompass()
@@ -155,6 +192,7 @@ struct MapRunView: View {
                     .foregroundStyle(.black)
                     .shadow(color: .white, radius: 2)
                     .allowsHitTesting(false)
+                    .accessibilityHidden(true)
             }
         }
         .frame(maxHeight: .infinity)
@@ -165,74 +203,86 @@ struct MapRunView: View {
         @Bindable var road = road
         let run = model.runMeasure
         return VStack(alignment: .leading, spacing: 8) {
-            Text(run.lengthForCalcs > 0 ? model.settings.lengthHeadline(feet: run.lengthForCalcs) : "—")
-                .outdoorFont(48)
-                .foregroundStyle(palette.text)
-                .minimumScaleFactor(0.5)
-                .lineLimit(1)
-                .accessibilityLabel(run.lengthForCalcs > 0 ? model.settings.lengthHeadline(feet: run.lengthForCalcs) : "No length yet")
-            Text(lengthCaption(run))
-                .font(.title3.weight(.bold))
-                .foregroundStyle(palette.text)
-            if run.plannedFeet > 0, run.pavedFeet > 0 {
-                ProgressView(value: min(max(run.fraction, 0), 1))
-                    .tint(run.overrun ? palette.warn : palette.good)
+            if !endFocused {
+                Text(run.lengthForCalcs > 0 ? model.settings.lengthHeadline(feet: run.lengthForCalcs) : "—")
+                    .outdoorFont(48)
+                    .foregroundStyle(palette.text)
+                    .minimumScaleFactor(0.35)
+                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .accessibilityLabel(run.lengthForCalcs > 0 ? model.settings.lengthHeadline(feet: run.lengthForCalcs) : "No length yet")
+                Text(lengthCaption(run))
+                    .font(.title3.weight(.bold))
+                    .foregroundStyle(palette.text)
+                    .fixedSize(horizontal: false, vertical: true)
+                if run.plannedFeet > 0, run.pavedFeet > 0 {
+                    ProgressView(value: min(max(run.fraction, 0), 1))
+                        .tint(run.overrun ? palette.warn : palette.good)
+                        .accessibilityLabel(run.overrun ? "Tracked line is past the plan" : "Plan progress")
+                        .accessibilityValue("\(FieldFormat.groupedRound(run.remainingFeet)) feet left")
+                }
             }
             ScrollView {
                 VStack(spacing: 10) {
                     roadControls
-                    Picker("Line", selection: $model.drawMode) {
-                        Text("Plan").tag(RunDrawMode.plan)
-                        Text("Paved").tag(RunDrawMode.paved)
-                    }
-                    .pickerStyle(.segmented)
-                    .frame(minHeight: 44)
+                    if !endFocused {
+                        FieldSegmented(
+                            label: "Line",
+                            options: [RunDrawMode.plan, .paved],
+                            title: lineTitle,
+                            selection: $model.drawMode
+                        )
 
-                    Button("Drop point") {
-                        model.dropPoint(GeoPoint(latitude: center.latitude, longitude: center.longitude))
-                        FieldHaptics.tap()
-                    }
-                    .buttonStyle(FieldPrimaryButtonStyle())
+                        Button("Drop point") {
+                            model.dropPoint(GeoPoint(latitude: center.latitude, longitude: center.longitude))
+                            FieldHaptics.tap()
+                        }
+                        .buttonStyle(FieldPrimaryButtonStyle())
 
-                    Button(tracking ? "Stop tracking" : "Track") {
-                        tracking.toggle()
-                        FieldHaptics.tap()
-                    }
-                    .buttonStyle(FieldSecondaryButtonStyle())
-
-                    Button("Use this length") {
-                        model.applyRunLengthToJob()
-                        FieldHaptics.success()
-                    }
-                    .buttonStyle(FieldPrimaryButtonStyle())
-                    .disabled(run.lengthForCalcs <= 0)
-
-                    HStack(spacing: 10) {
-                        Button("Undo point") {
-                            model.undoPoint()
+                        Button(tracking ? "Stop tracking" : "Track") {
+                            tracking.toggle()
                             FieldHaptics.tap()
                         }
                         .buttonStyle(FieldSecondaryButtonStyle())
-                        Button("Route") { showRoutes = true }
+
+                        Button("Use this length in calculators") {
+                            model.applyRunLengthToJob()
+                            FieldHaptics.success()
+                        }
+                        .buttonStyle(FieldPrimaryButtonStyle())
+                        .disabled(run.lengthForCalcs <= 0)
+                        .accessibilityHint("Fills length on spread rate, feet left, tonnage, and tack.")
+
+                        HStack(spacing: 10) {
+                            Button("Undo point") {
+                                model.undoPoint()
+                                FieldHaptics.tap()
+                            }
                             .buttonStyle(FieldSecondaryButtonStyle())
-                    }
-
-                    if let route = model.savedRoute {
-                        Text("\(route.routeID) · \(route.county) · \(FieldFormat.fixed(GeoMeasure.miles(feet: routeLength(route)), digits: 1)) mi centerline")
-                            .font(.body.weight(.semibold))
-                            .foregroundStyle(palette.text)
-                        Button("Use centerline length · \(FieldFormat.groupedRound(routeLength(route))) ft") {
-                            model.applyLength(routeLength(route))
-                            FieldHaptics.tap()
+                            Button("Find route") { showRoutes = true }
+                                .buttonStyle(FieldSecondaryButtonStyle())
+                                .accessibilityHint("Searches the GDOT centerline. It is not applied until you use the length.")
                         }
-                        .buttonStyle(FieldSecondaryButtonStyle())
-                    }
 
-                    Button("Clear line") { confirmClear = true }
-                        .buttonStyle(FieldSecondaryButtonStyle())
+                        if let route = model.savedRoute {
+                            Text("\(route.routeID) · \(route.county) · \(FieldFormat.fixed(GeoMeasure.miles(feet: routeLength(route)), digits: 1)) mi centerline")
+                                .font(.body.weight(.semibold))
+                                .foregroundStyle(palette.text)
+                                .fixedSize(horizontal: false, vertical: true)
+                            Button("Use centerline length · \(FieldFormat.groupedRound(routeLength(route))) ft") {
+                                model.applyLength(routeLength(route))
+                                FieldHaptics.tap()
+                            }
+                            .buttonStyle(FieldSecondaryButtonStyle())
+                        }
+
+                        Button("Clear line") { confirmClear = true }
+                            .buttonStyle(FieldSecondaryButtonStyle(destructive: true))
+                    }
                 }
             }
-            .frame(maxHeight: 320)
+            .fieldScroll()
+            .frame(maxHeight: endFocused ? .infinity : 320)
         }
         .padding(.horizontal, 16)
         .padding(.top, 12)
@@ -246,6 +296,7 @@ struct MapRunView: View {
             Text(road.message)
                 .font(.title3.weight(.bold))
                 .foregroundStyle(palette.text)
+                .fixedSize(horizontal: false, vertical: true)
             switch road.phase {
             case .start:
                 Button("Start here") {
@@ -280,39 +331,57 @@ struct MapRunView: View {
                     Text("\(choice.name) · \(GeoMeasure.stationLabel(feet: road.endFeet)) · \(FieldFormat.groupedRound(GeoMeasure.areaSquareYards(lengthFt: road.endFeet, widthFt: model.job.widthFt))) SY")
                         .font(.title3.weight(.bold))
                         .foregroundStyle(palette.text)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .modifier(Collapsed(on: endFocused))
                     Slider(value: $road.endFeet, in: 0...max(choice.lengthFeet, 1))
+                        .frame(minHeight: 44)
                         .accessibilityLabel("End along the road")
-                    BigNumberField(label: "End at", hint: "Feet from the start, along the road.", unit: "ft", text: $lengthText)
+                        .accessibilityValue("\(FieldFormat.groupedRound(road.endFeet)) feet")
+                        .modifier(Collapsed(on: endFocused))
+                    BigNumberField(
+                        label: "End at",
+                        hint: "Feet from the start, along the road. Done closes the keypad.",
+                        unit: "ft",
+                        focus: $endFocused,
+                        text: $lengthText
+                    )
                     Button("Set end at this length") {
                         if let feet = parseField(lengthText) {
+                            endFocused = false
                             road.endFeet = min(max(0, feet), choice.lengthFeet)
                             FieldHaptics.tap()
                         }
                     }
                     .buttonStyle(FieldPrimaryButtonStyle())
-                    ForEach(choice.forks) { fork in
-                        Button("Turn \(fork.heading) onto \(fork.name)") {
-                            road.takeFork(fork)
-                            FieldHaptics.tap()
+                    VStack(spacing: 10) {
+                        ForEach(choice.forks) { fork in
+                            Button("Turn \(fork.heading) onto \(fork.name)") {
+                                road.takeFork(fork)
+                                FieldHaptics.tap()
+                            }
+                            .buttonStyle(FieldSecondaryButtonStyle())
                         }
-                        .buttonStyle(FieldSecondaryButtonStyle())
                     }
+                    .modifier(Collapsed(on: endFocused))
                 }
             case .manual:
                 EmptyView()
             }
-            if road.phase != .manual {
-                Button("Drop points instead") {
-                    road.useManual()
+            Group {
+                if road.phase != .manual {
+                    Button("Drop points instead") {
+                        road.useManual()
+                    }
+                    .buttonStyle(FieldSecondaryButtonStyle())
+                } else {
+                    Button("Follow the road") {
+                        road.phase = .start
+                        road.message = "Drop a start on the road, or use the phone's GPS."
+                    }
+                    .buttonStyle(FieldSecondaryButtonStyle())
                 }
-                .buttonStyle(FieldSecondaryButtonStyle())
-            } else {
-                Button("Follow the road") {
-                    road.phase = .start
-                    road.message = "Drop a start on the road, or use the phone's GPS."
-                }
-                .buttonStyle(FieldSecondaryButtonStyle())
             }
+            .modifier(Collapsed(on: endFocused))
         }
     }
 
@@ -352,6 +421,13 @@ struct MapRunView: View {
         route.lines.reduce(0) { $0 + GeoMeasure.polylineFeet($1) }
     }
 
+    private func lineTitle(_ mode: RunDrawMode) -> String {
+        switch mode {
+        case .plan: return "Plan"
+        case .paved: return "Paved"
+        }
+    }
+
     private func directionArrow(_ heading: String) -> String {
         switch heading {
         case "N": return "↑"
@@ -379,6 +455,19 @@ struct MapRunView: View {
     }
 }
 
+private struct Collapsed: ViewModifier {
+    var on: Bool
+
+    func body(content: Content) -> some View {
+        content
+            .frame(height: on ? 0 : nil, alignment: .top)
+            .clipped()
+            .opacity(on ? 0 : 1)
+            .accessibilityHidden(on)
+            .allowsHitTesting(!on)
+    }
+}
+
 private struct RouteSearchSheet: View {
     var onPick: (GdotRoute) -> Void
 
@@ -393,7 +482,14 @@ private struct RouteSearchSheet: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 14) {
-                    BigNumberField(label: "Route", hint: "Road name or route id.", unit: "", numeric: false, text: $query)
+                    BigNumberField(
+                        label: "Route",
+                        hint: "Road name or route id.",
+                        unit: "",
+                        numeric: false,
+                        placeholder: "SR 20",
+                        text: $query
+                    )
                     Button(searching ? "Searching…" : "Search GDOT") {
                         Task { await search() }
                     }
@@ -427,6 +523,7 @@ private struct RouteSearchSheet: View {
                 }
                 .padding(20)
             }
+            .fieldScroll()
             .navigationTitle("GDOT route")
             .background(palette.background.ignoresSafeArea())
             .fieldKeyboardDone()

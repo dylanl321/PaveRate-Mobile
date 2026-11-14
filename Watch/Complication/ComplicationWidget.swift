@@ -59,17 +59,34 @@ struct ComplicationFace: View {
     var body: some View {
         switch family {
         case .accessoryCircular, .accessoryCorner:
-            Text(board.callWord)
+            Text(board.status == "none" ? "Open" : board.callWord)
                 .font(.headline.weight(.bold))
+                .minimumScaleFactor(0.45)
+                .lineLimit(2)
+                .multilineTextAlignment(.center)
+                .accessibilityLabel(board.callWord)
         case .accessoryInline:
             Text("\(board.feetLeftText) · \(board.callWord)")
+                .minimumScaleFactor(0.6)
+                .lineLimit(1)
         default:
             VStack(alignment: .leading, spacing: 1) {
-                Text(board.callWord).font(.headline.weight(.bold))
-                Text(board.feetLeftText).font(.caption.weight(.semibold)).lineLimit(1)
-                Text(board.tonsText).font(.caption2).lineLimit(1)
+                Text(board.callWord)
+                    .font(.headline.weight(.bold))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.6)
+                Text(board.feetLeftText)
+                    .font(.caption.weight(.semibold))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.55)
+                Text(board.tonsText)
+                    .font(.caption2)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.6)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
+            .accessibilityElement(children: .combine)
+            .accessibilityLabel("\(board.callWord). \(board.feetLeftText). \(board.tonsText)")
         }
     }
 }

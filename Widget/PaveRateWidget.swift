@@ -15,7 +15,6 @@ struct FeetLeftWidget: Widget {
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: "FeetLeft", provider: BoardProvider()) { entry in
             BoardFace(board: entry.board)
-                .containerBackground(BoardInk.background, for: .widget)
         }
         .configurationDisplayName("Feet left")
         .description("Feet left, tons remaining, and the go or hold call.")
@@ -55,32 +54,82 @@ struct BoardFace: View {
     var board: FieldBoard
     @Environment(\.widgetFamily) private var family
 
+    /// Lock Screen accessories sit on the wallpaper. Custom yellow ink disappears there.
+    private var accessory: Bool {
+        switch family {
+        case .accessoryInline, .accessoryRectangular, .accessoryCircular:
+            return true
+        default:
+            return false
+        }
+    }
+
     var body: some View {
+        face
+            .containerBackground(accessory ? Color.clear : BoardInk.background, for: .widget)
+    }
+
+    @ViewBuilder
+    private var face: some View {
+        if accessory {
+            accessoryFace
+        } else {
+            homeFace
+        }
+    }
+
+    @ViewBuilder
+    private var accessoryFace: some View {
         switch family {
         case .accessoryInline:
             Text("\(board.feetLeftText) · \(shortCall(board))")
                 .font(.body.weight(.bold).monospacedDigit())
-                .foregroundStyle(BoardInk.number)
+                .widgetAccentable()
         default:
-            VStack(alignment: .leading, spacing: 4) {
-                Text(board.headline)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(shortCall(board))
                     .font(.headline.weight(.bold))
-                    .foregroundStyle(callColor(board.status))
+                    .widgetAccentable()
                 Text(board.feetLeftText)
-                    .font(.title2.weight(.bold).monospacedDigit())
-                    .foregroundStyle(BoardInk.number)
-                    .minimumScaleFactor(0.6)
+                    .font(.caption.weight(.bold).monospacedDigit())
                     .lineLimit(1)
+                    .minimumScaleFactor(0.6)
                 Text(board.tonsText)
-                    .font(.body.weight(.bold).monospacedDigit())
-                    .foregroundStyle(BoardInk.text)
-                Text(board.jobName)
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(BoardInk.text)
+                    .font(.caption2.weight(.semibold).monospacedDigit())
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.6)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
             .accessibilityElement(children: .combine)
+            .accessibilityLabel("\(shortCall(board)). \(board.feetLeftText). \(board.tonsText)")
         }
+    }
+
+    private var homeFace: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(board.headline)
+                .font(.headline.weight(.bold))
+                .foregroundStyle(callColor(board.status))
+                .lineLimit(2)
+                .minimumScaleFactor(0.7)
+            Text(board.feetLeftText)
+                .font(.title2.weight(.bold).monospacedDigit())
+                .foregroundStyle(BoardInk.number)
+                .minimumScaleFactor(0.5)
+                .lineLimit(1)
+            Text(board.tonsText)
+                .font(.body.weight(.bold).monospacedDigit())
+                .foregroundStyle(BoardInk.text)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+            Text(board.jobName)
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(BoardInk.text)
+                .lineLimit(1)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(board.headline). \(board.feetLeftText). \(board.tonsText)")
     }
 }
 
@@ -108,6 +157,7 @@ struct PaveLiveActivity: Widget {
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(14)
             .background(BoardInk.background)
+            .containerBackground(BoardInk.background, for: .widget)
             .activityBackgroundTint(BoardInk.background)
             .activitySystemActionForegroundColor(BoardInk.text)
         } dynamicIsland: { context in
@@ -167,7 +217,7 @@ private func shortCall(status: String) -> String {
     case "pass": return "Go"
     case "warn": return "Watch"
     case "fail": return "Hold"
-    default: return "—"
+    default: return "Open"
     }
 }
 

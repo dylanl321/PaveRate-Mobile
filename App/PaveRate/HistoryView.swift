@@ -75,7 +75,7 @@ struct ArchiveDetailView: View {
                 }
                 ShareBar(summary: summary, images: images)
                 Button("Delete this saved day") { confirmDelete = true }
-                    .buttonStyle(FieldSecondaryButtonStyle())
+                    .buttonStyle(FieldSecondaryButtonStyle(destructive: true))
                     .accessibilityHint("Removes this copy from the phone. Today is left alone.")
             }
             .padding(20)

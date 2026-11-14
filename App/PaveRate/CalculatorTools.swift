@@ -25,12 +25,16 @@ struct SpreadRateTool: View {
                 .font(.title3.weight(.bold))
                 .foregroundStyle(palette.text)
             Text(report.targetLbsSy.map { "\(FieldFormat.groupedRound($0)) lbs/SY" } ?? "Set a thickness on the job")
-                .font(.system(size: 36, weight: .bold, design: .rounded))
+                .outdoorFont(36)
                 .foregroundStyle(palette.text)
+                .minimumScaleFactor(0.5)
+                .lineLimit(2)
 
-            Toggle("Override target rate", isOn: $model.inputs.spreadOverride)
-                .font(.title3.weight(.bold))
-                .tint(palette.accent)
+            FieldToggle(
+                title: "Override target rate",
+                detail: "Use a rate you type instead of thickness times 110.",
+                isOn: $model.inputs.spreadOverride
+            )
             if model.inputs.spreadOverride {
                 BigNumberField(label: "Custom target", unit: "lbs/SY", text: $model.inputs.spreadCustomRate)
             }
@@ -72,14 +76,12 @@ struct SpreadRateTool: View {
                let target = report.targetLbsSy {
                 Button("Snap tons to target rate") {
                     let tons = tonsToMatchRate(lengthFt: distance, widthFt: model.job.widthFt, rateLbsSy: target)
+                    model.checkpoint()
                     model.inputs.spreadTons = displayNumber(tons)
+                    FieldHaptics.tap()
                 }
-                .font(.title3.weight(.bold))
-                .frame(maxWidth: .infinity)
-                .frame(minHeight: 64)
-                .foregroundStyle(palette.accentText)
-                .background(palette.accent, in: RoundedRectangle(cornerRadius: 14))
-                .buttonStyle(.plain)
+                .buttonStyle(FieldPrimaryButtonStyle())
+                .accessibilityHint("Fills tons so the placed rate matches the target.")
             }
 
             ShowWorkBox(
@@ -149,6 +151,8 @@ struct FeetLeftTool: View {
             if let total, total > 0, let done = report.completedFeet {
                 ProgressView(value: min(max(done / total, 0), 1))
                     .tint(palette.good)
+                    .accessibilityLabel("Length paved")
+                    .accessibilityValue("\(FieldFormat.groupedRound(done)) of \(FieldFormat.groupedRound(total)) feet")
                 Text("\(FieldFormat.groupedRound(done)) of \(FieldFormat.groupedRound(total)) ft")
                     .font(.title3.weight(.semibold))
             }
@@ -373,7 +377,7 @@ struct MillingTool: View {
             BigNumberField(label: "Length to mill", unit: "ft", text: $lengthText)
             UseRunLengthButton { lengthText = $0 }
             BigNumberField(label: "Depth", unit: "in", text: $depthText)
-            BigNumberField(label: "Density", hint: "Tons per cubic yard.", unit: "t/CY", text: $densityText)
+            BigNumberField(label: "Density", hint: "Tons per cubic yard. About 2 for asphalt millings.", unit: "tons/CY", text: $densityText)
             ResultHero(
                 value: result.map { FieldFormat.fixed($0.tons, digits: 1) },
                 unit: "tons removed",

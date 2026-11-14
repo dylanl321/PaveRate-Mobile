@@ -112,20 +112,24 @@ struct PhotoNoteSection: View {
                     Text(note.line(index: index + 1))
                         .font(.title3.weight(.bold))
                         .foregroundStyle(palette.text)
-                    Button("Remove photo") {
+                    FieldWideButton(title: "Remove photo", destructive: true) {
                         model.deletePhoto(note.id)
                         FieldHaptics.tap()
                     }
-                    .font(.headline.weight(.bold))
-                    .foregroundStyle(palette.bad)
-                    .frame(minHeight: 44)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(14)
                 .background(palette.surface, in: RoundedRectangle(cornerRadius: 14))
                 .overlay(RoundedRectangle(cornerRadius: 14).stroke(palette.border, lineWidth: palette.borderWidth))
             }
-            BigNumberField(label: "Photo caption", hint: "What the picture is. Optional.", unit: "", numeric: false, text: $caption)
+            BigNumberField(
+                label: "Photo caption",
+                hint: "What the picture is. Optional.",
+                unit: "",
+                numeric: false,
+                placeholder: "What it shows",
+                text: $caption
+            )
             if UIImagePickerController.isSourceTypeAvailable(.camera) {
                 Button("Take photo") { showCamera = true }
                     .buttonStyle(FieldPrimaryButtonStyle())

@@ -74,12 +74,11 @@ struct WeatherStrip: View {
                 .buttonStyle(FieldSecondaryButtonStyle())
             }
 
-            Toggle(isOn: $model.followsWeather) {
-                Text("Keep filling from GPS")
-                    .font(.title3.weight(.bold))
-                    .foregroundStyle(palette.text)
-            }
-            .tint(palette.good)
+            FieldToggle(
+                title: "Keep filling from GPS",
+                detail: "A fresh reading fills temperature and rain. A number you type stays until you pull weather again.",
+                isOn: $model.followsWeather
+            )
         }
         .task {
             guard autoRefresh else { return }
@@ -95,7 +94,10 @@ struct WeatherStrip: View {
     private func readingGrid(_ reading: WeatherReading) -> some View {
         VStack(alignment: .leading, spacing: 6) {
             Text("\(FieldFormat.jsNumber(reading.airTempF))°F air · \(reading.conditions)")
-                .font(.system(size: 32, weight: .bold, design: .rounded))
+                .outdoorFont(32)
+                .minimumScaleFactor(0.5)
+                .lineLimit(3)
+                .fixedSize(horizontal: false, vertical: true)
             Text(windLine(reading))
                 .font(.title3.weight(.semibold))
             Text("Rain next 24 h \(FieldFormat.fixed(reading.rainNext24hIn, digits: 2)) in")
@@ -125,12 +127,14 @@ struct WeatherStrip: View {
                         Text(hour.precipIn > 0 ? "\(FieldFormat.fixed(hour.precipIn, digits: 2)) in" : "Dry")
                             .font(.body.weight(.semibold))
                     }
-                    .foregroundStyle(threat ? Color.white : palette.text)
+                    .foregroundStyle(threat ? palette.onStatus(.warn) : palette.text)
                     .padding(12)
-                    .frame(width: 116, alignment: .leading)
+                    .frame(minWidth: 116, alignment: .leading)
                     .frame(minHeight: 108)
+                    .fixedSize(horizontal: true, vertical: false)
                     .background(threat ? palette.warn : palette.surface, in: RoundedRectangle(cornerRadius: 14))
                     .overlay(RoundedRectangle(cornerRadius: 14).stroke(palette.border, lineWidth: palette.borderWidth))
+                    .accessibilityElement(children: .combine)
                 }
             }
         }

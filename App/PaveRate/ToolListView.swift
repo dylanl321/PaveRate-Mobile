@@ -43,6 +43,7 @@ struct ToolListView: View {
             }
             .padding(20)
         }
+        .fieldScroll()
         .navigationTitle("PaveRate")
         .background(palette.background.ignoresSafeArea())
     }
@@ -80,6 +81,7 @@ struct CalculatorScreen: View {
             }
             .padding(20)
         }
+        .fieldScroll()
         .navigationTitle(tool.title)
         .background(palette.background.ignoresSafeArea())
         .fieldKeyboardDone()
@@ -87,19 +89,19 @@ struct CalculatorScreen: View {
             ToolbarItem(placement: .topBarLeading) {
                 if model.canUndo {
                     Button("Undo") { model.undoLastChange() }
-                        .font(.title3.weight(.bold))
+                        .accessibilityHint("Puts back the last change on this phone.")
                 }
             }
             ToolbarItem(placement: .topBarTrailing) {
                 Button("Share") {
                     share = SharePayload(items: SummaryExport.items(for: model.summary(for: tool)))
                 }
-                .font(.title3.weight(.bold))
+                .accessibilityHint("Sends this calculator as text, a picture, and a PDF.")
             }
             if tool != .pavingWindow {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Clear") { model.clear(tool) }
-                        .font(.title3.weight(.bold))
+                        .accessibilityHint("Clears the numbers typed on this calculator. The job stays.")
                 }
             }
         }

@@ -54,6 +54,10 @@ struct FieldPalette {
     let good: Color
     let warn: Color
     let bad: Color
+    /// Ink painted on a good / warn / bad fill. Chosen so the word stays readable in sun.
+    let onGood: Color
+    let onWarn: Color
+    let onBad: Color
     let borderWidth: CGFloat
     let heroPoints: CGFloat
     let fieldPoints: CGFloat
@@ -69,8 +73,11 @@ struct FieldPalette {
         accent: Color(red: 0.961, green: 0.659, blue: 0),
         accentText: .black,
         good: Color(red: 0, green: 0.478, blue: 0.184),
-        warn: Color(red: 0.753, green: 0.345, blue: 0),
+        warn: Color(red: 0.60, green: 0.26, blue: 0),
         bad: Color(red: 0.8, green: 0, blue: 0),
+        onGood: .white,
+        onWarn: .white,
+        onBad: .white,
         borderWidth: 3,
         heroPoints: 68,
         fieldPoints: 36,
@@ -89,6 +96,9 @@ struct FieldPalette {
         good: Color(red: 0, green: 0.35, blue: 0.12),
         warn: Color(red: 0.55, green: 0.22, blue: 0),
         bad: Color(red: 0.7, green: 0, blue: 0),
+        onGood: .white,
+        onWarn: .white,
+        onBad: .white,
         borderWidth: 4,
         heroPoints: 76,
         fieldPoints: 40,
@@ -107,6 +117,9 @@ struct FieldPalette {
         good: Color(red: 0.247, green: 0.698, blue: 0.498),
         warn: Color(red: 0.878, green: 0.573, blue: 0.184),
         bad: Color(red: 0.847, green: 0.345, blue: 0.310),
+        onGood: .black,
+        onWarn: .black,
+        onBad: .black,
         borderWidth: 1,
         heroPoints: 64,
         fieldPoints: 34,
@@ -126,6 +139,14 @@ struct FieldPalette {
         case .good: return good
         case .warn: return warn
         case .bad: return bad
+        }
+    }
+
+    func onStatus(_ kind: StatusKind) -> Color {
+        switch kind {
+        case .good: return onGood
+        case .warn: return onWarn
+        case .bad: return onBad
         }
     }
 }

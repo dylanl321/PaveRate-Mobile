@@ -27,14 +27,13 @@ struct SettingsView: View {
                 Text("The big number on the map. Stations are the same feet, written as 12+50.")
                     .font(.body.weight(.semibold))
                     .foregroundStyle(palette.text)
-                Picker("Length", selection: $model.settings.lengthDisplay) {
-                    ForEach(LengthDisplay.allCases, id: \.self) { display in
-                        Text(display.title).tag(display)
-                    }
-                }
-                .pickerStyle(.segmented)
-                .frame(minHeight: 44)
-                .accessibilityLabel("Length display")
+                    .fixedSize(horizontal: false, vertical: true)
+                FieldSegmented(
+                    label: "Length display",
+                    options: Array(LengthDisplay.allCases),
+                    title: { $0.title },
+                    selection: $model.settings.lengthDisplay
+                )
 
                 SectionLabel(text: "Wind note")
                 Text("A field note, not a GDOT cutoff. Tack is not blocked by wind.")
@@ -82,33 +81,29 @@ struct SettingsView: View {
                 .buttonStyle(FieldPrimaryButtonStyle())
                 .accessibilityHint("Copies width, thickness, course, and machine onto the job. Asks for nothing else.")
 
-                Toggle(isOn: $model.settings.preferGlare) {
-                    Text("Glare is the default")
-                        .font(.title3.weight(.bold))
-                        .foregroundStyle(palette.text)
-                }
-                .tint(palette.good)
+                FieldToggle(
+                    title: "Glare by default",
+                    detail: "On switches to Glare now. Off leaves this screen as it is. Sunlight and Night are on the Job tab.",
+                    isOn: $model.settings.preferGlare
+                )
                 .onChange(of: model.settings.preferGlare) { _, on in
                     if on { model.appearance = .glare }
                 }
 
-                Toggle(isOn: $model.consoleOn) {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("Lock Screen")
-                            .font(.title3.weight(.bold))
-                        Text("Feet left, tons left, and the go or hold call while the phone is on the paver.")
-                            .font(.body.weight(.semibold))
-                    }
-                    .foregroundStyle(palette.text)
-                }
-                .tint(palette.good)
+                FieldToggle(
+                    title: "Lock Screen",
+                    detail: "Feet left, tons left, and the go or hold call while the phone is on the paver.",
+                    isOn: $model.consoleOn
+                )
 
-                Text("The Lock Screen updates from the app itself. The Home Screen widget stays on “Open PaveRate” until the App Group \(FieldBoardStore.appGroupID) is on both app ids. The steps are in the README. The archive does not require that group.")
+                Text("The Lock Screen updates from this app. The Home Screen widget shows the same numbers on a black card. Until the shared group is included in the install, that widget says Open PaveRate.")
                     .font(.body.weight(.semibold))
                     .foregroundStyle(palette.text)
+                    .fixedSize(horizontal: false, vertical: true)
             }
             .padding(20)
         }
+        .fieldScroll()
         .navigationTitle("Settings")
         .background(palette.background.ignoresSafeArea())
         .fieldKeyboardDone()

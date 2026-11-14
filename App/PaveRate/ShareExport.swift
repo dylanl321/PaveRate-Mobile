@@ -132,8 +132,13 @@ struct ShareBar: View {
                 UIPasteboard.general.string = summary.plainText
                 FieldHaptics.success()
                 copied = true
+                Task {
+                    try? await Task.sleep(for: .seconds(2))
+                    copied = false
+                }
             }
             .buttonStyle(FieldSecondaryButtonStyle())
+            .accessibilityLabel(copied ? "Copied" : "Copy text")
         }
         .sheet(item: $payload) { payload in
             ActivityShare(items: payload.items)
@@ -198,28 +203,43 @@ enum FieldHaptics {
 
 struct FieldPrimaryButtonStyle: ButtonStyle {
     @Environment(\.fieldPalette) private var palette
+    @Environment(\.isEnabled) private var isEnabled
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(.title2.weight(.bold))
+            .multilineTextAlignment(.center)
+            .lineLimit(3)
+            .minimumScaleFactor(0.7)
             .frame(maxWidth: .infinity)
             .frame(minHeight: palette.minControl)
             .foregroundStyle(palette.accentText)
             .background(palette.accent, in: RoundedRectangle(cornerRadius: 14))
             .overlay(RoundedRectangle(cornerRadius: 14).stroke(palette.border, lineWidth: palette.borderWidth))
+            .opacity(!isEnabled ? 0.4 : (configuration.isPressed ? 0.72 : 1))
     }
 }
 
 struct FieldSecondaryButtonStyle: ButtonStyle {
+    var destructive: Bool = false
+
     @Environment(\.fieldPalette) private var palette
+    @Environment(\.isEnabled) private var isEnabled
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(.title3.weight(.bold))
+            .multilineTextAlignment(.center)
+            .lineLimit(3)
+            .minimumScaleFactor(0.7)
             .frame(maxWidth: .infinity)
             .frame(minHeight: palette.minControl)
-            .foregroundStyle(palette.text)
+            .foregroundStyle(destructive ? palette.bad : palette.text)
             .background(palette.surface, in: RoundedRectangle(cornerRadius: 14))
-            .overlay(RoundedRectangle(cornerRadius: 14).stroke(palette.border, lineWidth: palette.borderWidth))
+            .overlay(
+                RoundedRectangle(cornerRadius: 14)
+                    .stroke(destructive ? palette.bad : palette.border, lineWidth: palette.borderWidth)
+            )
+            .opacity(!isEnabled ? 0.4 : (configuration.isPressed ? 0.72 : 1))
     }
 }

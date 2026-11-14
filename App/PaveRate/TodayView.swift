@@ -28,6 +28,7 @@ struct TodayView: View {
                     hint: "Saved with the day. Optional.",
                     unit: "",
                     numeric: false,
+                    placeholder: "What happened today",
                     text: $noteText
                 )
                 ShareBar(
@@ -61,8 +62,10 @@ struct TodayView: View {
             .padding(20)
             .padding(.bottom, 12)
         }
+        .fieldScroll()
         .navigationTitle("Today")
         .background(palette.background.ignoresSafeArea())
+        .fieldKeyboardDone()
         .onAppear { noteText = model.dayNote }
         .onChange(of: noteText) { _, newValue in
             if newValue != model.dayNote { model.dayNote = newValue }
@@ -91,11 +94,13 @@ struct TodayView: View {
             Text(board.headline)
                 .font(.title.weight(.bold))
                 .foregroundStyle(palette.text)
+                .fixedSize(horizontal: false, vertical: true)
             Text(board.feetLeftText)
                 .outdoorFont(palette.heroPoints)
                 .foregroundStyle(palette.text)
-                .minimumScaleFactor(0.4)
-                .lineLimit(1)
+                .minimumScaleFactor(0.35)
+                .lineLimit(2)
+                .fixedSize(horizontal: false, vertical: true)
             Text(board.tonsText)
                 .font(.title2.weight(.bold))
                 .foregroundStyle(palette.text)
@@ -118,14 +123,18 @@ struct TodayView: View {
                     .outdoorFont(palette.heroPoints)
                     .accessibilityLabel(model.settings.lengthHeadline(feet: run.lengthForCalcs))
                     .foregroundStyle(palette.text)
-                    .minimumScaleFactor(0.4)
-                    .lineLimit(1)
+                    .minimumScaleFactor(0.35)
+                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
                 Text(run.plannedFeet > 0 ? "Plan \(run.stationPlanned) · \(FieldFormat.groupedRound(run.plannedAreaSqYd)) SY" : "Tracked \(run.stationPaved)")
                     .font(.title3.weight(.semibold))
                     .foregroundStyle(palette.text)
+                    .fixedSize(horizontal: false, vertical: true)
                 if run.plannedFeet > 0 {
                     ProgressView(value: min(max(run.fraction, 0), 1))
                         .tint(run.overrun ? palette.warn : palette.good)
+                        .accessibilityLabel(run.overrun ? "Tracked line is past the plan" : "Plan progress")
+                        .accessibilityValue("\(FieldFormat.groupedRound(run.remainingFeet)) feet left")
                     Text(run.overrun ? "Tracked line is longer than the plan." : "\(FieldFormat.groupedRound(run.remainingFeet)) ft left on the plan")
                         .font(.title3.weight(.semibold))
                         .foregroundStyle(palette.text)
@@ -143,8 +152,10 @@ struct TodayView: View {
                     .foregroundStyle(palette.text)
             } else {
                 Text("\(FieldFormat.fixed(LoadLedger.tonsPlaced(model.loads), digits: 2)) tons placed")
-                    .font(.system(size: 36, weight: .bold, design: .rounded))
+                    .outdoorFont(36)
                     .foregroundStyle(palette.text)
+                    .minimumScaleFactor(0.5)
+                    .lineLimit(2)
                 ForEach(Array(model.loads.enumerated()), id: \.element.id) { index, load in
                     loadRow(index: index + 1, load: load)
                 }
@@ -171,22 +182,19 @@ struct TodayView: View {
             Text(LoadLedger.line(index: index, load: load, job: model.job))
                 .font(.title3.weight(.bold))
                 .foregroundStyle(palette.text)
+                .fixedSize(horizontal: false, vertical: true)
             if let guidance = yield.spec?.guidance {
                 Text(guidance)
                     .font(.body.weight(.semibold))
                     .foregroundStyle(palette.text)
+                    .fixedSize(horizontal: false, vertical: true)
             }
-            Button("Edit load") { editing = load }
-                .font(.headline.weight(.bold))
-                .frame(minHeight: 44)
-                .foregroundStyle(palette.text)
-            Button("Remove load") {
+            FieldWideButton(title: "Edit load") { editing = load }
+            FieldWideButton(title: "Remove load", destructive: true) {
                 model.deleteLoad(load.id)
                 FieldHaptics.tap()
             }
-            .font(.headline.weight(.bold))
-            .frame(minHeight: 44)
-            .foregroundStyle(palette.bad)
+            .accessibilityHint(load.truck.isEmpty ? "Removes this ticket" : "Removes truck \(load.truck)")
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(14)
@@ -195,11 +203,17 @@ struct TodayView: View {
     }
 
     private var glareButton: some View {
-        Button(model.appearance == .glare ? "Sunlight" : "Glare mode") {
-            model.appearance = model.appearance == .glare ? .sunlight : .glare
+        Button(model.appearance == .glare ? "Use sunlight" : "Use glare") {
+            switch model.appearance {
+            case .glare:
+                model.appearance = .sunlight
+            case .sunlight, .night:
+                model.appearance = .glare
+            }
             FieldHaptics.tap()
         }
         .buttonStyle(FieldSecondaryButtonStyle())
+        .accessibilityHint("Glare makes the type and the buttons larger for full sun. Night is on the Job tab.")
     }
 }
 
@@ -227,6 +241,7 @@ struct AddLoadSheet: View {
                         hint: existing == nil && !truck.isEmpty ? "Filled from the last ticket. Change it if this is a different truck." : "Number on the side of the truck.",
                         unit: "",
                         numeric: false,
+                        placeholder: "Number",
                         text: $truck
                     )
                     BigNumberField(label: "Tons on the ticket", unit: "tons", text: $tons)
@@ -300,6 +315,7 @@ struct AddLoadSheet: View {
                 }
                 .padding(20)
             }
+            .fieldScroll()
             .navigationTitle(existing == nil ? "Load" : "Edit load")
             .background(palette.background.ignoresSafeArea())
             .fieldKeyboardDone()
