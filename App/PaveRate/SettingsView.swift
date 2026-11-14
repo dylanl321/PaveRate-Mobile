@@ -4,6 +4,7 @@ import PaveRateCore
 struct SettingsView: View {
     @Environment(AppModel.self) private var model
     @Environment(\.fieldPalette) private var palette
+    @AppStorage(FieldDensity.storageKey) private var densityRaw = FieldDensity.field.rawValue
 
     @State private var windText = ""
     @State private var strongText = ""
@@ -14,7 +15,19 @@ struct SettingsView: View {
     var body: some View {
         @Bindable var model = model
         ScrollView {
-            VStack(alignment: .leading, spacing: 18) {
+            VStack(alignment: .leading, spacing: palette.stackSpacing) {
+                SectionLabel(text: "Layout")
+                Text("Field keeps the thick buttons. Compact fits more on the screen. The colors do not change.")
+                    .font(.body.weight(.semibold))
+                    .foregroundStyle(palette.text)
+                    .fixedSize(horizontal: false, vertical: true)
+                FieldSegmented(
+                    label: "Layout",
+                    options: Array(FieldDensity.allCases),
+                    title: { $0.title },
+                    selection: densityBinding
+                )
+
                 Text("These stay on this phone. The mix math stays in feet, tons, pounds per square yard, and °F.")
                     .font(.title3.weight(.semibold))
                     .foregroundStyle(palette.text)
@@ -27,14 +40,13 @@ struct SettingsView: View {
                 Text("The big number on the map. Stations are the same feet, written as 12+50.")
                     .font(.body.weight(.semibold))
                     .foregroundStyle(palette.text)
-                Picker("Length", selection: $model.settings.lengthDisplay) {
-                    ForEach(LengthDisplay.allCases, id: \.self) { display in
-                        Text(display.title).tag(display)
-                    }
-                }
-                .pickerStyle(.segmented)
-                .frame(minHeight: 44)
-                .accessibilityLabel("Length display")
+                    .fixedSize(horizontal: false, vertical: true)
+                FieldSegmented(
+                    label: "Length display",
+                    options: Array(LengthDisplay.allCases),
+                    title: { $0.title },
+                    selection: $model.settings.lengthDisplay
+                )
 
                 SectionLabel(text: "Wind note")
                 Text("A field note, not a GDOT cutoff. Tack is not blocked by wind.")
@@ -82,32 +94,27 @@ struct SettingsView: View {
                 .buttonStyle(FieldPrimaryButtonStyle())
                 .accessibilityHint("Copies width, thickness, course, and machine onto the job. Asks for nothing else.")
 
-                Toggle(isOn: $model.settings.preferGlare) {
-                    Text("Glare is the default")
-                        .font(.title3.weight(.bold))
-                        .foregroundStyle(palette.text)
-                }
-                .tint(palette.good)
+                FieldToggle(
+                    title: "Glare by default",
+                    detail: "On switches to Glare now. Off leaves this screen as it is. Sunlight and Night are on the Job tab.",
+                    isOn: $model.settings.preferGlare
+                )
                 .onChange(of: model.settings.preferGlare) { _, on in
                     if on { model.appearance = .glare }
                 }
 
-                Toggle(isOn: $model.consoleOn) {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("Lock Screen")
-                            .font(.title3.weight(.bold))
-                        Text("Feet left, tons left, and the go or hold call while the phone is on the paver.")
-                            .font(.body.weight(.semibold))
-                    }
-                    .foregroundStyle(palette.text)
-                }
-                .tint(palette.good)
+                FieldToggle(
+                    title: "Lock Screen",
+                    detail: "Feet left, tons left, and the go or hold call while the phone is on the paver.",
+                    isOn: $model.consoleOn
+                )
 
-                Text("The Lock Screen updates from the app itself. The Home Screen widget stays on “Open PaveRate” until the App Group \(FieldBoardStore.appGroupID) is on both app ids. The steps are in the README. The archive does not require that group.")
+                Text("The Lock Screen updates from this app. The Home Screen widget shows the same numbers on a black card. Until the shared group is included in the install, that widget says Open PaveRate.")
                     .font(.body.weight(.semibold))
                     .foregroundStyle(palette.text)
+                    .fixedSize(horizontal: false, vertical: true)
             }
-            .padding(20)
+            .padding(palette.pagePadding)
         }
         .fieldScroll()
         .navigationTitle("Settings")
@@ -119,6 +126,13 @@ struct SettingsView: View {
         .onChange(of: plantText) { _, _ in syncNumbers() }
         .onChange(of: widthText) { _, _ in syncNumbers() }
         .onChange(of: thicknessText) { _, _ in syncNumbers() }
+    }
+
+    private var densityBinding: Binding<FieldDensity> {
+        Binding(
+            get: { FieldDensity(rawValue: densityRaw) ?? .field },
+            set: { densityRaw = $0.rawValue }
+        )
     }
 
     private func loadDrafts() {

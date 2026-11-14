@@ -7,80 +7,109 @@ struct BigNumberField: View {
     var hint: String?
     let unit: String
     var numeric: Bool = true
+    var placeholder: String? = nil
     @Binding var text: String
-    /// Runs when Done commits the field. The map uses this to place the end.
+    /// The map uses this to shrink while the keypad is up.
+    var onFocusChange: ((Bool) -> Void)? = nil
+    /// Done commits the field, then runs this. The map places the end here.
     var onSubmit: (() -> Void)? = nil
 
     @Environment(\.fieldPalette) private var palette
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @FocusState private var focused: Bool
 
+    private var spokenLabel: String {
+        unit.isEmpty ? label : "\(label), \(unit)"
+    }
+
+    private var fieldSize: CGFloat {
+        palette.fieldPoints * palette.fontScale * min(OutdoorScale.multiplier(dynamicTypeSize), palette.fieldTypeCap)
+    }
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: palette.tightSpacing) {
             Text(label)
                 .font(.title3.weight(.bold))
                 .foregroundStyle(palette.text)
-            HStack(spacing: 12) {
-                TextField(numeric ? "0" : "Name", text: $text)
-                    .keyboardType(numeric ? .decimalPad : .default)
-                    .textInputAutocapitalization(numeric ? .never : .words)
-                    .focused($focused)
-                    .submitLabel(.done)
-                    .onSubmit {
-                        commitValue()
-                        focused = false
-                    }
-                    .font(.system(size: palette.fieldPoints, weight: .bold, design: .rounded))
-                    .foregroundStyle(palette.text)
-                    .minimumScaleFactor(0.6)
-                    .accessibilityLabel(label)
-                    .onChange(of: focused) { _, isOn in
-                        if isOn {
-                            let binding = $text
-                            let submit = onSubmit
-                            let isNumeric = numeric
-                            FieldKeyboard.submit = {
-                                if isNumeric, let value = parseField(binding.wrappedValue) {
-                                    let shown = displayNumber(value)
-                                    if binding.wrappedValue != shown {
-                                        binding.wrappedValue = shown
-                                    }
-                                }
-                                submit?()
-                            }
-                        }
-                    }
+                .fixedSize(horizontal: false, vertical: true)
+                .accessibilityHidden(true)
+            HStack(alignment: .firstTextBaseline, spacing: palette.tightSpacing) {
+                entry
+                    .layoutPriority(1)
                 if !unit.isEmpty {
                     Text(unit)
                         .font(.title2.weight(.semibold))
                         .foregroundStyle(palette.muted)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.5)
+                        .accessibilityHidden(true)
                 }
             }
-            .padding(.horizontal, 16)
+            .padding(.horizontal, palette.cardPadding)
+            .padding(.vertical, palette.tightSpacing)
             .frame(minHeight: palette.minControl)
-            .background(palette.surface, in: RoundedRectangle(cornerRadius: 14))
+            .background(palette.surface, in: RoundedRectangle(cornerRadius: palette.cornerRadius))
             .overlay(
-                RoundedRectangle(cornerRadius: 14)
+                RoundedRectangle(cornerRadius: palette.cornerRadius)
                     .stroke(palette.border, lineWidth: palette.borderWidth)
             )
             if let hint {
                 Text(hint)
                     .font(.body)
                     .foregroundStyle(palette.muted)
+                    .fixedSize(horizontal: false, vertical: true)
             }
         }
     }
 
-    /// Writes a clean number back into the field, then runs the screen's submit.
-    private func commitValue() {
-        if numeric, let value = parseField(text) {
-            let shown = displayNumber(value)
-            if text != shown { text = shown }
+    @ViewBuilder
+    private var entry: some View {
+        if numeric {
+            styled(
+                TextField(placeholder ?? "0", text: $text)
+                    .keyboardType(.decimalPad)
+                    .textInputAutocapitalization(.never)
+            )
+        } else {
+            styled(
+                TextField(placeholder ?? "Name", text: $text, axis: .vertical)
+                    .lineLimit(1...6)
+                    .textInputAutocapitalization(.words)
+            )
         }
-        onSubmit?()
+    }
+
+    private func styled<V: View>(_ view: V) -> some View {
+        view
+            .font(.system(size: fieldSize, weight: .bold, design: .rounded))
+            .foregroundStyle(palette.text)
+            .focused($focused)
+            .submitLabel(.done)
+            .onSubmit { FieldKeyboard.done() }
+            .onChange(of: focused) { _, isOn in
+                onFocusChange?(isOn)
+                if isOn { registerSubmit() }
+            }
+            .accessibilityLabel(spokenLabel)
+    }
+
+    private func registerSubmit() {
+        let binding = $text
+        let submit = onSubmit
+        let isNumeric = numeric
+        FieldKeyboard.submit = {
+            if isNumeric, let value = parseField(binding.wrappedValue) {
+                let shown = displayNumber(value)
+                if binding.wrappedValue != shown {
+                    binding.wrappedValue = shown
+                }
+            }
+            submit?()
+        }
     }
 }
 
-/// One place for the keypad's Done button and for taps that should close it.
+/// One keypad Done button. It commits the number, runs the screen's submit, then closes.
 @MainActor
 enum FieldKeyboard {
     static var submit: (() -> Void)?
@@ -103,7 +132,7 @@ enum FieldKeyboard {
     }
 }
 
-/// Closes the keypad when the tap is not on the field itself. Buttons still receive the tap.
+/// Closes the keypad when the tap is not on the field or a button. The map tap uses this too.
 private struct KeyboardDismissInstaller: UIViewRepresentable {
     func makeUIView(context: Context) -> UIView {
         let view = UIView(frame: .zero)
@@ -182,15 +211,16 @@ struct ChoiceButton: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, 16)
+            .padding(.vertical, 10)
             .frame(minHeight: palette.minControl)
             .foregroundStyle(selected ? palette.accentText : palette.text)
-            .background(selected ? palette.accent : palette.surface, in: RoundedRectangle(cornerRadius: 14))
+            .background(selected ? palette.accent : palette.surface, in: RoundedRectangle(cornerRadius: palette.cornerRadius))
             .overlay(
-                RoundedRectangle(cornerRadius: 14)
+                RoundedRectangle(cornerRadius: palette.cornerRadius)
                     .stroke(palette.border, lineWidth: palette.borderWidth)
             )
         }
-        .buttonStyle(.plain)
+        .buttonStyle(FieldPressStyle())
         .accessibilityAddTraits(selected ? .isSelected : [])
     }
 }
@@ -209,7 +239,10 @@ struct ResultHero: View {
             if let status, let statusText {
                 Text(statusText)
                     .font(.headline.weight(.bold))
-                    .foregroundStyle(.white)
+                    .foregroundStyle(palette.onStatus(status))
+                    .multilineTextAlignment(.leading)
+                    .lineLimit(3)
+                    .fixedSize(horizontal: false, vertical: true)
                     .padding(.horizontal, 14)
                     .padding(.vertical, 8)
                     .background(palette.status(status), in: Capsule())
@@ -218,23 +251,26 @@ struct ResultHero: View {
             Text(value ?? "—")
                 .outdoorFont(palette.heroPoints)
                 .foregroundStyle(palette.text)
-                .minimumScaleFactor(0.4)
-                .lineLimit(1)
+                .minimumScaleFactor(0.35)
+                .lineLimit(2)
+                .fixedSize(horizontal: false, vertical: true)
                 .accessibilityLabel(value == nil ? "No result yet" : "\(value ?? "") \(unit)")
             Text(unit)
                 .font(.title2.weight(.semibold))
                 .foregroundStyle(palette.muted)
+                .fixedSize(horizontal: false, vertical: true)
             if let secondary {
                 Text(secondary)
                     .font(.title3)
                     .foregroundStyle(palette.text)
+                    .fixedSize(horizontal: false, vertical: true)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(18)
-        .background(palette.surfaceAlt, in: RoundedRectangle(cornerRadius: 18))
+        .padding(palette.cardPadding)
+        .background(palette.surfaceAlt, in: RoundedRectangle(cornerRadius: palette.cornerRadius))
         .overlay(
-            RoundedRectangle(cornerRadius: 18)
+            RoundedRectangle(cornerRadius: palette.cornerRadius)
                 .stroke(palette.border, lineWidth: palette.borderWidth)
         )
     }
@@ -256,10 +292,10 @@ struct StatusBanner: View {
                     .font(.body)
             }
         }
-        .foregroundStyle(.white)
+        .foregroundStyle(palette.onStatus(kind))
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(16)
-        .background(palette.status(kind), in: RoundedRectangle(cornerRadius: 14))
+        .padding(palette.cardPadding)
+        .background(palette.status(kind), in: RoundedRectangle(cornerRadius: palette.cornerRadius))
         .accessibilityElement(children: .combine)
         .accessibilityLabel(detail.map { "\(message). \($0)" } ?? message)
     }
@@ -274,13 +310,15 @@ struct ShowWorkBox: View {
     @State private var open = false
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: palette.tightSpacing) {
             Button {
                 open.toggle()
             } label: {
                 HStack {
                     Text(open ? "Hide your work" : "Show your work")
                         .font(.title3.weight(.bold))
+                        .lineLimit(2)
+                        .minimumScaleFactor(0.7)
                     Spacer()
                     if !steps.isEmpty {
                         Text("\(steps.count)")
@@ -292,7 +330,7 @@ struct ShowWorkBox: View {
                     }
                 }
                 .foregroundStyle(palette.text)
-                .frame(minHeight: 56)
+                .frame(minHeight: palette.keypadHeight)
             }
             .buttonStyle(.plain)
             .accessibilityLabel(open ? "Hide your work" : "Show your work")
@@ -302,6 +340,7 @@ struct ShowWorkBox: View {
                     Text(emptyFormula)
                         .font(.title3.monospaced())
                         .foregroundStyle(palette.text)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
                 ForEach(steps, id: \.step) { step in
                     VStack(alignment: .leading, spacing: 4) {
@@ -311,13 +350,15 @@ struct ShowWorkBox: View {
                         Text(step.formula)
                             .font(.title3.monospaced())
                             .foregroundStyle(palette.text)
+                            .fixedSize(horizontal: false, vertical: true)
                         Text(step.result)
                             .font(.title3.weight(.bold))
                             .foregroundStyle(palette.text)
+                            .fixedSize(horizontal: false, vertical: true)
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(14)
-                    .background(palette.surface, in: RoundedRectangle(cornerRadius: 12))
+                    .padding(palette.cardPadding)
+                    .background(palette.surface, in: RoundedRectangle(cornerRadius: palette.cornerRadius))
                 }
                 ForEach(Array(notes.enumerated()), id: \.offset) { _, note in
                     Text(note)
@@ -326,10 +367,10 @@ struct ShowWorkBox: View {
                 }
             }
         }
-        .padding(16)
-        .background(palette.surfaceAlt, in: RoundedRectangle(cornerRadius: 16))
+        .padding(palette.cardPadding)
+        .background(palette.surfaceAlt, in: RoundedRectangle(cornerRadius: palette.cornerRadius))
         .overlay(
-            RoundedRectangle(cornerRadius: 16)
+            RoundedRectangle(cornerRadius: palette.cornerRadius)
                 .stroke(palette.border, lineWidth: palette.borderWidth)
         )
     }
@@ -380,28 +421,34 @@ struct JobStrip: View {
         }
         .foregroundStyle(palette.accentText)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(16)
-        .background(palette.accent, in: RoundedRectangle(cornerRadius: 16))
+        .padding(palette.cardPadding)
+        .background(palette.accent, in: RoundedRectangle(cornerRadius: palette.cornerRadius))
+    }
+}
+
+struct KeypadDoneButton: View {
+    @Environment(\.fieldPalette) private var palette
+
+    var body: some View {
+        Button("Done") { FieldKeyboard.done() }
+            .font(.title2.weight(.bold))
+            .padding(.horizontal, palette.cardPadding)
+            .padding(.vertical, palette.tightSpacing)
+            .frame(minWidth: palette.minControl * 1.7, minHeight: palette.keypadHeight)
+            .foregroundStyle(palette.accentText)
+            .background(palette.accent, in: Capsule())
+            .accessibilityLabel("Done")
+            .accessibilityHint("Saves this number and closes the keypad.")
     }
 }
 
 extension View {
-    /// Number pads have no return key. This bar is the way off them.
+    /// Number pads have no return key. One Done button, on the screens that contain a field.
     func fieldKeyboardDone() -> some View {
         toolbar {
             ToolbarItemGroup(placement: .keyboard) {
                 Spacer()
-                Button("Done") {
-                    FieldKeyboard.done()
-                }
-                .font(.title2.weight(.bold))
-                .padding(.horizontal, 28)
-                .padding(.vertical, 8)
-                .frame(minWidth: 132, minHeight: 52)
-                .foregroundStyle(FieldPalette.sunlight.accentText)
-                .background(FieldPalette.sunlight.accent, in: Capsule())
-                .accessibilityLabel("Done")
-                .accessibilityHint("Saves this number and closes the keypad.")
+                KeypadDoneButton()
             }
         }
     }
@@ -409,11 +456,114 @@ extension View {
     func fieldScroll() -> some View {
         scrollDismissesKeyboard(.interactively)
     }
-}
 
-extension View {
     func installKeyboardDismiss() -> some View {
         background(KeyboardDismissInstaller())
+    }
+}
+
+struct FieldPressStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .opacity(configuration.isPressed ? 0.72 : 1)
+    }
+}
+
+struct FieldSegmented<Value: Hashable>: View {
+    let label: String
+    let options: [Value]
+    let title: (Value) -> String
+    @Binding var selection: Value
+
+    @Environment(\.fieldPalette) private var palette
+
+    var body: some View {
+        HStack(spacing: palette.tightSpacing) {
+            ForEach(options, id: \.self) { option in
+                let selected = option == selection
+                Button {
+                    selection = option
+                    FieldHaptics.tap()
+                } label: {
+                    Text(title(option))
+                        .font(.title3.weight(.bold))
+                        .lineLimit(2)
+                        .minimumScaleFactor(0.65)
+                        .multilineTextAlignment(.center)
+                        .frame(maxWidth: .infinity)
+                        .frame(minHeight: palette.keypadHeight)
+                        .foregroundStyle(selected ? palette.accentText : palette.text)
+                        .background(selected ? palette.accent : palette.surface, in: RoundedRectangle(cornerRadius: palette.cornerRadius))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: palette.cornerRadius)
+                                .stroke(palette.border, lineWidth: palette.borderWidth)
+                        )
+                }
+                .buttonStyle(FieldPressStyle())
+                .accessibilityLabel(title(option))
+                .accessibilityAddTraits(selected ? .isSelected : [])
+            }
+        }
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel(label)
+    }
+}
+
+struct FieldToggle: View {
+    let title: String
+    var detail: String? = nil
+    @Binding var isOn: Bool
+    var onTint: Color? = nil
+
+    @Environment(\.fieldPalette) private var palette
+
+    var body: some View {
+        Toggle(isOn: $isOn) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(title)
+                    .font(.title3.weight(.bold))
+                    .foregroundStyle(palette.text)
+                    .fixedSize(horizontal: false, vertical: true)
+                if let detail {
+                    Text(detail)
+                        .font(.body.weight(.semibold))
+                        .foregroundStyle(palette.muted)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+        }
+        .tint(onTint ?? palette.good)
+        .padding(palette.cardPadding)
+        .frame(maxWidth: .infinity, minHeight: palette.minControl, alignment: .leading)
+        .background(palette.surface, in: RoundedRectangle(cornerRadius: palette.cornerRadius))
+        .overlay(RoundedRectangle(cornerRadius: palette.cornerRadius).stroke(palette.border, lineWidth: palette.borderWidth))
+    }
+}
+
+struct FieldWideButton: View {
+    let title: String
+    var destructive: Bool = false
+    let action: () -> Void
+
+    @Environment(\.fieldPalette) private var palette
+
+    var body: some View {
+        Button(action: action) {
+            Text(title)
+                .font(.title3.weight(.bold))
+                .multilineTextAlignment(.center)
+                .lineLimit(2)
+                .minimumScaleFactor(0.75)
+                .frame(maxWidth: .infinity)
+                .frame(minHeight: max(palette.keypadHeight, palette.minControl - 12))
+                .foregroundStyle(destructive ? palette.bad : palette.text)
+                .background(palette.surface, in: RoundedRectangle(cornerRadius: palette.cornerRadius))
+                .overlay(
+                    RoundedRectangle(cornerRadius: palette.cornerRadius)
+                        .stroke(destructive ? palette.bad : palette.border, lineWidth: palette.borderWidth)
+                )
+        }
+        .buttonStyle(FieldPressStyle())
     }
 }
 

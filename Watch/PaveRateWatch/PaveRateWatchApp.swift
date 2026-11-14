@@ -17,23 +17,43 @@ struct WatchGlance: View {
     var board: FieldBoard
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 2) {
+        VStack(alignment: .leading, spacing: 3) {
             Text(board.callWord)
-                .font(.title3.weight(.bold))
+                .font(.title2.weight(.heavy))
+                .foregroundStyle(callTint(board.status))
+                .lineLimit(1)
+                .minimumScaleFactor(0.5)
             Text(board.feetLeftText)
                 .font(.headline.weight(.bold))
-                .minimumScaleFactor(0.6)
+                .foregroundStyle(.white)
                 .lineLimit(2)
+                .minimumScaleFactor(0.5)
             Text(board.tonsText)
-                .font(.body.weight(.semibold))
+                .font(.footnote.weight(.semibold))
+                .foregroundStyle(.white)
                 .lineLimit(2)
+                .minimumScaleFactor(0.6)
             Text(board.jobName)
-                .font(.caption2)
+                .font(.caption2.weight(.semibold))
+                .foregroundStyle(Color.white.opacity(0.85))
                 .lineLimit(1)
+                .minimumScaleFactor(0.7)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .padding(.horizontal, 4)
+        .padding(.vertical, 2)
+        .background(Color.black.ignoresSafeArea())
         .accessibilityElement(children: .combine)
         .accessibilityLabel("\(board.callWord). \(board.feetLeftText). \(board.tonsText)")
+    }
+
+    private func callTint(_ status: String) -> Color {
+        switch status {
+        case "pass": return Color(red: 0.30, green: 0.90, blue: 0.45)
+        case "warn": return Color(red: 1, green: 0.78, blue: 0.15)
+        case "fail": return Color(red: 1, green: 0.32, blue: 0.28)
+        default: return .white
+        }
     }
 }
 

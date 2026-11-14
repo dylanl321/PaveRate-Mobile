@@ -13,7 +13,7 @@ struct TodayView: View {
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 18) {
+            VStack(alignment: .leading, spacing: palette.stackSpacing) {
                 boardGlance
                 JobStrip(job: model.job)
                 WeatherStrip(autoRefresh: true)
@@ -28,6 +28,7 @@ struct TodayView: View {
                     hint: "Saved with the day. Optional.",
                     unit: "",
                     numeric: false,
+                    placeholder: "What happened today",
                     text: $noteText
                 )
                 ShareBar(
@@ -58,13 +59,13 @@ struct TodayView: View {
                     .accessibilityHint("Puts back the last change on this phone.")
                 }
             }
-            .padding(20)
-            .padding(.bottom, 12)
+            .padding(palette.pagePadding)
+            .padding(.bottom, palette.tightSpacing)
         }
         .fieldScroll()
-        .fieldKeyboardDone()
         .navigationTitle("Today")
         .background(palette.background.ignoresSafeArea())
+        .fieldKeyboardDone()
         .onAppear { noteText = model.dayNote }
         .onChange(of: noteText) { _, newValue in
             if newValue != model.dayNote { model.dayNote = newValue }
@@ -93,11 +94,13 @@ struct TodayView: View {
             Text(board.headline)
                 .font(.title.weight(.bold))
                 .foregroundStyle(palette.text)
+                .fixedSize(horizontal: false, vertical: true)
             Text(board.feetLeftText)
                 .outdoorFont(palette.heroPoints)
                 .foregroundStyle(palette.text)
-                .minimumScaleFactor(0.4)
-                .lineLimit(1)
+                .minimumScaleFactor(0.35)
+                .lineLimit(2)
+                .fixedSize(horizontal: false, vertical: true)
             Text(board.tonsText)
                 .font(.title2.weight(.bold))
                 .foregroundStyle(palette.text)
@@ -120,14 +123,18 @@ struct TodayView: View {
                     .outdoorFont(palette.heroPoints)
                     .accessibilityLabel(model.settings.lengthHeadline(feet: run.lengthForCalcs))
                     .foregroundStyle(palette.text)
-                    .minimumScaleFactor(0.4)
-                    .lineLimit(1)
+                    .minimumScaleFactor(0.35)
+                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
                 Text(run.plannedFeet > 0 ? "Plan \(run.stationPlanned) · \(FieldFormat.groupedRound(run.plannedAreaSqYd)) SY" : "Tracked \(run.stationPaved)")
                     .font(.title3.weight(.semibold))
                     .foregroundStyle(palette.text)
+                    .fixedSize(horizontal: false, vertical: true)
                 if run.plannedFeet > 0 {
                     ProgressView(value: min(max(run.fraction, 0), 1))
                         .tint(run.overrun ? palette.warn : palette.good)
+                        .accessibilityLabel(run.overrun ? "Tracked line is past the plan" : "Plan progress")
+                        .accessibilityValue("\(FieldFormat.groupedRound(run.remainingFeet)) feet left")
                     Text(run.overrun ? "Tracked line is longer than the plan." : "\(FieldFormat.groupedRound(run.remainingFeet)) ft left on the plan")
                         .font(.title3.weight(.semibold))
                         .foregroundStyle(palette.text)
@@ -137,7 +144,7 @@ struct TodayView: View {
     }
 
     private var loads: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: palette.stackSpacing) {
             SectionLabel(text: "Loads")
             if model.loads.isEmpty {
                 Text("No tickets yet. Tons placed on Feet Left come from this list once you add one.")
@@ -145,8 +152,10 @@ struct TodayView: View {
                     .foregroundStyle(palette.text)
             } else {
                 Text("\(FieldFormat.fixed(LoadLedger.tonsPlaced(model.loads), digits: 2)) tons placed")
-                    .font(.system(size: 36, weight: .bold, design: .rounded))
+                    .outdoorFont(36)
                     .foregroundStyle(palette.text)
+                    .minimumScaleFactor(0.5)
+                    .lineLimit(2)
                 ForEach(Array(model.loads.enumerated()), id: \.element.id) { index, load in
                     loadRow(index: index + 1, load: load)
                 }
@@ -173,35 +182,38 @@ struct TodayView: View {
             Text(LoadLedger.line(index: index, load: load, job: model.job))
                 .font(.title3.weight(.bold))
                 .foregroundStyle(palette.text)
+                .fixedSize(horizontal: false, vertical: true)
             if let guidance = yield.spec?.guidance {
                 Text(guidance)
                     .font(.body.weight(.semibold))
                     .foregroundStyle(palette.text)
+                    .fixedSize(horizontal: false, vertical: true)
             }
-            Button("Edit load") { editing = load }
-                .font(.headline.weight(.bold))
-                .frame(minHeight: 44)
-                .foregroundStyle(palette.text)
-            Button("Remove load") {
+            FieldWideButton(title: "Edit load") { editing = load }
+            FieldWideButton(title: "Remove load", destructive: true) {
                 model.deleteLoad(load.id)
                 FieldHaptics.tap()
             }
-            .font(.headline.weight(.bold))
-            .frame(minHeight: 44)
-            .foregroundStyle(palette.bad)
+            .accessibilityHint(load.truck.isEmpty ? "Removes this ticket" : "Removes truck \(load.truck)")
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(14)
-        .background(palette.surface, in: RoundedRectangle(cornerRadius: 14))
-        .overlay(RoundedRectangle(cornerRadius: 14).stroke(palette.border, lineWidth: palette.borderWidth))
+        .background(palette.surface, in: RoundedRectangle(cornerRadius: palette.cornerRadius))
+        .overlay(RoundedRectangle(cornerRadius: palette.cornerRadius).stroke(palette.border, lineWidth: palette.borderWidth))
     }
 
     private var glareButton: some View {
-        Button(model.appearance == .glare ? "Sunlight" : "Glare mode") {
-            model.appearance = model.appearance == .glare ? .sunlight : .glare
+        Button(model.appearance == .glare ? "Use sunlight" : "Use glare") {
+            switch model.appearance {
+            case .glare:
+                model.appearance = .sunlight
+            case .sunlight, .night:
+                model.appearance = .glare
+            }
             FieldHaptics.tap()
         }
         .buttonStyle(FieldSecondaryButtonStyle())
+        .accessibilityHint("Glare makes the type and the buttons larger for full sun. Night is on the Job tab.")
     }
 }
 
@@ -223,12 +235,13 @@ struct AddLoadSheet: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(alignment: .leading, spacing: 18) {
+                VStack(alignment: .leading, spacing: palette.stackSpacing) {
                     BigNumberField(
                         label: "Truck",
                         hint: existing == nil && !truck.isEmpty ? "Filled from the last ticket. Change it if this is a different truck." : "Number on the side of the truck.",
                         unit: "",
                         numeric: false,
+                        placeholder: "Number",
                         text: $truck
                     )
                     BigNumberField(label: "Tons on the ticket", unit: "tons", text: $tons)
@@ -250,8 +263,8 @@ struct AddLoadSheet: View {
                             .frame(maxWidth: .infinity)
                             .frame(minHeight: palette.minControl)
                             .foregroundStyle(palette.text)
-                            .background(palette.surface, in: RoundedRectangle(cornerRadius: 14))
-                            .overlay(RoundedRectangle(cornerRadius: 14).stroke(palette.border, lineWidth: palette.borderWidth))
+                            .background(palette.surface, in: RoundedRectangle(cornerRadius: palette.cornerRadius))
+                            .overlay(RoundedRectangle(cornerRadius: palette.cornerRadius).stroke(palette.border, lineWidth: palette.borderWidth))
                     }
                     if let yield = preview {
                         if let expected = yield.expectedFeet {
@@ -300,7 +313,7 @@ struct AddLoadSheet: View {
                     }
                     .buttonStyle(FieldPrimaryButtonStyle())
                 }
-                .padding(20)
+                .padding(palette.pagePadding)
             }
             .fieldScroll()
             .navigationTitle(existing == nil ? "Load" : "Edit load")

@@ -7,7 +7,7 @@ struct ToolListView: View {
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 14) {
+            VStack(alignment: .leading, spacing: palette.stackSpacing) {
                 JobStrip(job: model.job)
                 Text("Shared setup is on the Job tab. Every calculator uses it.")
                     .font(.body)
@@ -30,18 +30,18 @@ struct ToolListView: View {
                         }
                         .foregroundStyle(palette.text)
                         .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(18)
+                        .padding(palette.cardPadding)
                         .frame(minHeight: 84)
-                        .background(palette.surface, in: RoundedRectangle(cornerRadius: 16))
+                        .background(palette.surface, in: RoundedRectangle(cornerRadius: palette.cornerRadius))
                         .overlay(
-                            RoundedRectangle(cornerRadius: 16)
+                            RoundedRectangle(cornerRadius: palette.cornerRadius)
                                 .stroke(palette.border, lineWidth: palette.borderWidth)
                         )
                     }
                     .buttonStyle(.plain)
                 }
             }
-            .padding(20)
+            .padding(palette.pagePadding)
         }
         .fieldScroll()
         .navigationTitle("PaveRate")
@@ -58,7 +58,7 @@ struct CalculatorScreen: View {
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 22) {
+            VStack(alignment: .leading, spacing: palette.stackSpacing) {
                 JobStrip(job: model.job)
                 switch tool {
                 case .spreadRate:
@@ -78,35 +78,35 @@ struct CalculatorScreen: View {
                 case .pavingWindow:
                     PavingWindowTool()
                 }
+                calculatorActions
             }
-            .padding(20)
+            .padding(palette.pagePadding)
         }
         .fieldScroll()
         .navigationTitle(tool.title)
         .background(palette.background.ignoresSafeArea())
         .fieldKeyboardDone()
-        .toolbar {
-            ToolbarItem(placement: .topBarLeading) {
-                if model.canUndo {
-                    Button("Undo") { model.undoLastChange() }
-                        .font(.title3.weight(.bold))
-                }
-            }
-            ToolbarItem(placement: .topBarTrailing) {
-                Button("Share") {
-                    share = SharePayload(items: SummaryExport.items(for: model.summary(for: tool)))
-                }
-                .font(.title3.weight(.bold))
-            }
-            if tool != .pavingWindow {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button("Clear") { model.clear(tool) }
-                        .font(.title3.weight(.bold))
-                }
-            }
-        }
         .sheet(item: $share) { payload in
             ActivityShare(items: payload.items)
+        }
+    }
+
+    @ViewBuilder
+    private var calculatorActions: some View {
+        if model.canUndo {
+            Button("Undo") { model.undoLastChange() }
+                .buttonStyle(FieldSecondaryButtonStyle())
+                .accessibilityHint("Puts back the last change on this phone.")
+        }
+        Button("Share") {
+            share = SharePayload(items: SummaryExport.items(for: model.summary(for: tool)))
+        }
+        .buttonStyle(FieldSecondaryButtonStyle())
+        .accessibilityHint("Sends this calculator as text, a picture, and a PDF.")
+        if tool != .pavingWindow {
+            Button("Clear") { model.clear(tool) }
+                .buttonStyle(FieldSecondaryButtonStyle(destructive: true))
+                .accessibilityHint("Clears the numbers typed on this calculator. The job stays.")
         }
     }
 }

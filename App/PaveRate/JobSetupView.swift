@@ -4,6 +4,7 @@ import PaveRateCore
 struct JobSetupView: View {
     @Environment(AppModel.self) private var model
     @Environment(\.fieldPalette) private var palette
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     @State private var widthText = ""
     @State private var thicknessText = ""
@@ -14,16 +15,15 @@ struct JobSetupView: View {
     var body: some View {
         @Bindable var model = model
         ScrollView {
-            VStack(alignment: .leading, spacing: 22) {
+            VStack(alignment: .leading, spacing: palette.stackSpacing) {
                 VStack(alignment: .leading, spacing: 8) {
                     SectionLabel(text: "Screen")
-                    Picker("Screen", selection: $model.appearance) {
-                        ForEach(FieldAppearance.allCases, id: \.self) { appearance in
-                            Text(appearance.title).tag(appearance)
-                        }
-                    }
-                    .pickerStyle(.segmented)
-                    .frame(minHeight: 44)
+                    FieldSegmented(
+                        label: "Screen",
+                        options: Array(FieldAppearance.allCases),
+                        title: { $0.title },
+                        selection: $model.appearance
+                    )
                 }
 
                 BigNumberField(
@@ -31,6 +31,7 @@ struct JobSetupView: View {
                     hint: "Optional. Shows on every calculator.",
                     unit: "",
                     numeric: false,
+                    placeholder: "Optional",
                     text: $model.job.siteName
                 )
 
@@ -85,20 +86,11 @@ struct JobSetupView: View {
                     }
                 }
 
-                Toggle(isOn: $model.job.firstPass) {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("First pass")
-                            .font(.title3.weight(.bold))
-                        Text("Subtract hopper or buggy tons from the actual spread rate.")
-                            .font(.body)
-                            .foregroundStyle(palette.muted)
-                    }
-                }
-                .tint(palette.good)
-                .padding(16)
-                .frame(minHeight: palette.minControl)
-                .background(palette.surface, in: RoundedRectangle(cornerRadius: 14))
-                .overlay(RoundedRectangle(cornerRadius: 14).stroke(palette.border, lineWidth: palette.borderWidth))
+                FieldToggle(
+                    title: "First pass",
+                    detail: "Subtract hopper or buggy tons from the actual spread rate.",
+                    isOn: $model.job.firstPass
+                )
 
                 BigNumberField(
                     label: "Truck load size",
@@ -119,16 +111,7 @@ struct JobSetupView: View {
                 }
 
                 SectionLabel(text: "Ordering waste")
-                HStack(spacing: 10) {
-                    ForEach(PaveRateConfig.wasteOptions, id: \.self) { option in
-                        ChoiceButton(
-                            title: "\(displayNumber(option))%",
-                            selected: model.job.wastePct == option
-                        ) {
-                            model.job.wastePct = option
-                        }
-                    }
-                }
+                wasteChoices
 
                 SectionLabel(text: "Air and surface")
                 WeatherStrip(showsTimeline: false)
@@ -142,20 +125,12 @@ struct JobSetupView: View {
                     unit: "in",
                     text: $rainText
                 )
-                Toggle(isOn: $model.job.surfaceWet) {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("Surface is wet")
-                            .font(.title3.weight(.bold))
-                        Text("Blocks tack. Do not shoot tack on a wet or frozen surface.")
-                            .font(.body)
-                            .foregroundStyle(palette.muted)
-                    }
-                }
-                .tint(palette.bad)
-                .padding(16)
-                .frame(minHeight: palette.minControl)
-                .background(palette.surface, in: RoundedRectangle(cornerRadius: 14))
-                .overlay(RoundedRectangle(cornerRadius: 14).stroke(palette.border, lineWidth: palette.borderWidth))
+                FieldToggle(
+                    title: "Surface is wet",
+                    detail: "Blocks tack. Do not shoot tack on a wet or frozen surface.",
+                    isOn: $model.job.surfaceWet,
+                    onTint: palette.bad
+                )
 
                 if let placement = placementCheck(airTempF: model.job.airTempF, thicknessIn: model.job.thicknessIn) {
                     StatusBanner(kind: placement.status.kind, message: placement.message, detail: placement.guidance)
@@ -164,7 +139,7 @@ struct JobSetupView: View {
                     StatusBanner(kind: openGraded.status.kind, message: openGraded.message)
                 }
             }
-            .padding(20)
+            .padding(palette.pagePadding)
         }
         .fieldScroll()
         .navigationTitle("Job")
@@ -211,15 +186,37 @@ struct JobSetupView: View {
             Text("Target spread rate")
                 .font(.headline.weight(.bold))
             Text("\(FieldFormat.groupedRound(model.job.targetRateLbsSy)) lbs/SY")
-                .font(.system(size: 40, weight: .bold, design: .rounded))
+                .outdoorFont(40)
+                .minimumScaleFactor(0.5)
+                .lineLimit(2)
             Text("Mix rule of thumb: 110 lbs/SY per inch of compacted thickness. Not a lab density.")
                 .font(.body)
         }
         .foregroundStyle(palette.text)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(16)
-        .background(palette.surfaceAlt, in: RoundedRectangle(cornerRadius: 14))
-        .overlay(RoundedRectangle(cornerRadius: 14).stroke(palette.border, lineWidth: palette.borderWidth))
+        .padding(palette.cardPadding)
+        .background(palette.surfaceAlt, in: RoundedRectangle(cornerRadius: palette.cornerRadius))
+        .overlay(RoundedRectangle(cornerRadius: palette.cornerRadius).stroke(palette.border, lineWidth: palette.borderWidth))
+    }
+
+    @ViewBuilder
+    private var wasteChoices: some View {
+        if dynamicTypeSize.isAccessibilitySize {
+            VStack(spacing: 10) { wasteButtons }
+        } else {
+            HStack(spacing: 10) { wasteButtons }
+        }
+    }
+
+    private var wasteButtons: some View {
+        ForEach(PaveRateConfig.wasteOptions, id: \.self) { option in
+            ChoiceButton(
+                title: "\(displayNumber(option))%",
+                selected: model.job.wastePct == option
+            ) {
+                model.job.wastePct = option
+            }
+        }
     }
 
     private func labeledStepper(
@@ -232,7 +229,7 @@ struct JobSetupView: View {
     ) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             BigNumberField(label: label, hint: hint, unit: unit, text: text)
-            HStack(spacing: 12) {
+            HStack(spacing: palette.tightSpacing) {
                 stepButton(title: "− \(displayNumber(step))", action: { apply(-step) })
                 stepButton(title: "+ \(displayNumber(step))", action: { apply(step) })
             }
@@ -243,12 +240,15 @@ struct JobSetupView: View {
         Button(action: action) {
             Text(title)
                 .font(.title2.weight(.bold))
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
                 .frame(maxWidth: .infinity)
                 .frame(minHeight: palette.minControl)
                 .foregroundStyle(palette.accentText)
-                .background(palette.accent, in: RoundedRectangle(cornerRadius: 14))
+                .background(palette.accent, in: RoundedRectangle(cornerRadius: palette.cornerRadius))
+                .overlay(RoundedRectangle(cornerRadius: palette.cornerRadius).stroke(palette.border, lineWidth: palette.borderWidth))
         }
-        .buttonStyle(.plain)
+        .buttonStyle(FieldPressStyle())
     }
 
     private func loadDrafts() {
